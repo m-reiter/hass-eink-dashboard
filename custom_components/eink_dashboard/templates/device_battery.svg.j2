@@ -27,12 +27,12 @@
   font-size="{{ font_sz | font_px }}" dominant-baseline="central"
   fill="{{ color_hex }}">{{ label }}</text>
 {%- else -%}
-<rect x="{{ body_x }}" y="{{ icon_y }}" width="{{ body_w }}" height="{{ body_h }}"
+<rect x="{{ body_x - 0.5 }}" y="{{ icon_y + 0.5 }}" width="{{ body_w }}" height="{{ body_h }}"
   fill="none" stroke="{{ hex_gray }}" stroke-width="1"/>
-<rect x="{{ nub_abs_x }}" y="{{ nub_y }}" width="{{ nub_w }}"
+<rect x="{{ nub_abs_x - 0.5 }}" y="{{ nub_y + 0.5 }}" width="{{ nub_w }}"
   height="{{ nub_h }}" fill="{{ hex_gray }}"/>
 {%- if fill_w > 0 -%}
-<rect x="{{ fill_abs_x }}" y="{{ icon_fill_y }}" width="{{ fill_w }}"
+<rect x="{{ fill_abs_x - 0.5 }}" y="{{ icon_fill_y + 0.5 }}" width="{{ fill_w }}"
   height="{{ icon_fill_h }}" fill="{{ color_hex }}"/>
 {%- endif -%}
 <text x="{{ text_abs_x }}" y="{{ text_svg_y }}"
