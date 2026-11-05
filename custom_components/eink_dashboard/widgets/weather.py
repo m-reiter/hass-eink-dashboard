@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 import markupsafe
@@ -462,7 +462,26 @@ def _build_weather_context(
     pressure = attrs.get("pressure")
     pressure_unit = attrs.get("pressure_unit", "hPa")
     cloud_coverage = attrs.get("cloud_coverage")
-    forecast = attrs.get("forecast", [])
+    if forecast_type == "hourly":
+        forecast = attrs.get("forecast_hourly", [])
+        # Filter: only show forecasts at least 1 hour in the future
+        now = datetime.now()
+        threshold = now + timedelta(hours=1)
+        filtered = []
+        for entry in forecast:
+            dt_str = entry.get("datetime", "")
+            if dt_str:
+                try:
+                    dt = datetime.fromisoformat(dt_str)
+                    if dt >= threshold:
+                        filtered.append(entry)
+                except ValueError:
+                    filtered.append(entry)
+            else:
+                filtered.append(entry)
+        forecast = filtered
+    else:
+        forecast = attrs.get("forecast", [])
     has_forecast = (
         show_forecast_section and bool(forecast) and forecast_days > 0
     )
