@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 import markupsafe
@@ -40,6 +40,7 @@ from ._helpers import (
     _color_context,
     _fmt,
     _metrics_context,
+    _resolve_tz,
     _temp_gradient_stops,
     _widget_dim,
 )
@@ -330,6 +331,7 @@ def _forecast_divider_extra(
     return 0
 
 
+# ruff: noqa: C901
 def _build_weather_context(
     widget: WeatherWidget,
     config: DisplayConfig,
@@ -414,6 +416,9 @@ def _build_weather_context(
     show_forecast_section = mode != "current"
     display_levels = config.get("display_levels", 16)
 
+    # Timezone for converting UTC forecast times to local time.
+    tz = _resolve_tz(config)
+
     scale = font_size / FONT_SIZE_WEATHER
 
     # Card width: use explicit w or natural width capped to
@@ -464,25 +469,29 @@ def _build_weather_context(
     cloud_coverage = attrs.get("cloud_coverage")
     if forecast_type == "hourly":
         forecast = attrs.get("forecast_hourly", [])
-        if show_current:
-            # Filter: only show forecasts at least 1 hour in the future
-            # if we show current conditions
-            now = datetime.now(UTC)
-            threshold = now + timedelta(hours=1)
-            filtered = []
-            for entry in forecast:
-                dt_str = entry.get("datetime", "")
-                if dt_str:
-                    try:
-                        dt = datetime.fromisoformat(dt_str)
-                        if dt.tzinfo is None:
-                            dt = dt.replace(tzinfo=UTC)
-                        if dt >= threshold:
-                            filtered.append(entry)
-                    except ValueError:
+        now = datetime.now(UTC)
+        threshold = now + timedelta(minutes=30)
+        filtered = []
+        for entry in forecast:
+            dt_str = entry.get("datetime", "")
+            if dt_str:
+                try:
+                    dt = datetime.fromisoformat(dt_str)
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=UTC)
+                    # Store converted local time on entry for display
+
+                    entry["display_time"] = dt.astimezone(tz).strftime("%H:%M")
+
+                    if dt >= threshold:
                         filtered.append(entry)
-                else:
+                except ValueError:
+                    entry["display_time"] = dt_str[:5]
                     filtered.append(entry)
+            else:
+                entry["display_time"] = ""
+                filtered.append(entry)
+        if show_current:
             forecast = filtered
     else:
         forecast = attrs.get("forecast", [])
@@ -826,7 +835,7 @@ def _build_weather_context(
             if dt_str:
                 dt = datetime.fromisoformat(dt_str)
                 if forecast_type == "hourly":
-                    day_label = dt.strftime("%H:%M")
+                    day_label = day.get("display_time", dt_str[:5])
                 else:
                     day_label = _weekday_abbrev(dt.date(), lang)
             else:
