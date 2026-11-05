@@ -520,7 +520,8 @@ async def _fetch_forecasts(
     weather entity referenced by ``widgets``: daily forecasts for
     ``WEATHER`` widgets, written to
     ``states[entity_id]["attributes"]["forecast"]``, and hourly
-    forecasts for ``METEOGRAM`` widgets, written to
+    forecasts for ``WEATHER`` widgets with ``forecast_type="hourly"``
+    and ``METEOGRAM`` widgets, written to
     ``states[entity_id]["attributes"]["forecast_hourly"]``. This way
     ``render_widget_svg`` sees the same data as the scheduled image
     render path.
