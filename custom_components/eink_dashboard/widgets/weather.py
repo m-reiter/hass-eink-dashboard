@@ -342,9 +342,10 @@ def _build_weather_context(
     Args:
         widget: Widget config dict.  Recognised keys:
             ``entity``, ``x``, ``y``, ``w``, ``font_size``,
-            ``forecast_days``, ``card_style``, ``mode``,
-            ``temperature_entity``, ``humidity_entity``,
-            ``fonts`` (per-role font weight overrides — a mapping
+            ``forecast_days``, ``forecast_type``, ``forecast_hours``,
+            ``card_style``, ``mode``, ``temperature_entity``,
+            ``humidity_entity``, ``fonts`` (per-role font weight
+            overrides — a mapping
             of role name to ``{"size": int, "weight": str}``; roles
             are ``"temp"`` (default ``"bold"``), ``"detail"``
             (default ``"regular"``), and ``"precip"`` (default
@@ -398,7 +399,13 @@ def _build_weather_context(
         }
 
     font_size = widget.get("font_size", FONT_SIZE_WEATHER)
-    forecast_days = widget.get("forecast_days", 5)
+    forecast_type: str = widget.get("forecast_type", "daily")
+    if forecast_type not in ("daily", "hourly"):
+        forecast_type = "daily"
+    if forecast_type == "hourly":
+        forecast_days = widget.get("forecast_hours", 12)
+    else:
+        forecast_days = widget.get("forecast_days", 5)
     card_style = widget.get("card_style", DEFAULT_CARD_STYLE)
     mode = widget.get("mode", DEFAULT_WEATHER_MODE)
     # Unrecognised values intentionally fall back to full mode,
@@ -794,9 +801,11 @@ def _build_weather_context(
             cx = content_left + col_width * col_i + col_width // 2
             dt_str = day.get("datetime")
             if dt_str:
-                day_label = _weekday_abbrev(
-                    datetime.fromisoformat(dt_str).date(), lang
-                )
+                dt = datetime.fromisoformat(dt_str)
+                if forecast_type == "hourly":
+                    day_label = dt.strftime("%H:%M")
+                else:
+                    day_label = _weekday_abbrev(dt.date(), lang)
             else:
                 day_label = ""
 
@@ -809,7 +818,10 @@ def _build_weather_context(
                 fc_icon_svg = ""
 
             fc_hi_val = day.get("temperature", "")
-            fc_lo_val = day.get("templow", "")
+            if forecast_type == "hourly":
+                fc_lo_val = ""
+            else:
+                fc_lo_val = day.get("templow", "")
             fc_hi = (
                 f"{_fmt_temp(fc_hi_val, nf, lang)}°" if fc_hi_val != "" else ""
             )
@@ -823,6 +835,12 @@ def _build_weather_context(
                 else ""
             )
             icon_cy_fc = forecast_y + round(_WX_FC_ICON_CY * scale)
+            # In hourly mode, precipitation moves up to the
+            # position where the low temp would be (no lo temp).
+            if forecast_type == "hourly":
+                precip_y_offset = round(_WX_FC_LO_Y * scale)
+            else:
+                precip_y_offset = round(_WX_FC_PRECIP_Y * scale)
             forecast_entries.append(
                 {
                     "cx": cx,
@@ -836,7 +854,7 @@ def _build_weather_context(
                     "lo": fc_lo,
                     "lo_y": forecast_y + round(_WX_FC_LO_Y * scale),
                     "precip": fc_precip,
-                    "precip_y": forecast_y + round(_WX_FC_PRECIP_Y * scale),
+                    "precip_y": forecast_y + precip_y_offset,
                 }
             )
 
