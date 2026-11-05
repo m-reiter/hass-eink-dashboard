@@ -611,6 +611,8 @@ export interface WasteScheduleWidget extends WidgetBase {
    * falls within the next 3 days.  When true, always shows all entries.
    */
   show_all?: boolean;
+  /** Sort order for the visible entries. */
+  sort?: "default" | "days" | "alpha";
   /** Decorative frame style. */
   card_style?: CardStyle;
   /**

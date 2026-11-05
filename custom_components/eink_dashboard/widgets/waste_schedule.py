@@ -86,7 +86,11 @@ def _build_waste_schedule_context(
             ``entries`` (list of ``{"attribute": …, "label": …}``
             dicts), ``layout`` (``"list"`` or ``"card"``),
             ``show_all`` (``bool``, default ``False``),
-            ``fonts`` (per-role font overrides — a mapping of
+            ``sort`` (``str``, default ``"default"``; one of
+            ``"default"`` (config order), ``"days"`` (soonest
+            collection first), or ``"alpha"`` (label
+            alphabetically)),
+            ``fonts`` (per-role font overrides - a mapping of
             role name to ``{"size": int, "weight": str}``; roles
             are ``"title"``, ``"primary"``, ``"secondary"``, and
             ``"value"``.  An omitted ``size`` keeps the widget's
@@ -132,6 +136,7 @@ def _build_waste_schedule_context(
     card_style = widget.get("card_style", DEFAULT_CARD_STYLE)
     title: str = widget.get("title", "")
     show_all: bool = bool(widget.get("show_all", False))
+    sort: str = widget.get("sort", "default")
     hide_icon: bool = bool(widget.get("hide_icon", False))
     max_row_h = _max_row_height(widget, config)
     language: str = config.get("language", "en")
@@ -155,8 +160,8 @@ def _build_waste_schedule_context(
 
     # Resolve visible entries before computing height so the
     # auto-sizing fallback knows how many rows to accommodate.
-    # Config order is preserved — equal-day entries keep the
-    # order the user configured them, matching the PIL renderer.
+    # Default sort preserves config order — equal-day entries
+    # keep the order the user configured them.
     # Use _get_today() from render.py so tests can patch
     # "custom_components.eink_dashboard.render.date" to control
     # the date returned here.
@@ -183,6 +188,13 @@ def _build_waste_schedule_context(
         # config order), displayed at full widget height.
         visible.sort(key=lambda e: e[2])
         visible = [visible[0]]
+    else:
+        # Apply sort for list layout.
+        if sort == "days":
+            visible.sort(key=lambda e: e[2])
+        elif sort == "alpha":
+            visible.sort(key=lambda e: e[0].lower())
+        # "default": preserve config order (no sort).
 
     # Auto-size: default to content height so the widget is no
     # taller than its rendered rows.  Explicit "h" in the widget

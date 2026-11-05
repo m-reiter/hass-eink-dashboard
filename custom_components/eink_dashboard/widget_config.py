@@ -536,6 +536,10 @@ class WasteScheduleWidget(WidgetBase, ListFields, total=False):
     """``"list"`` or ``"card"``."""
     show_all: bool
     """Show every collection, not only the next one."""
+    sort: str
+    """Sort order for visible entries: ``"default"`` (config order),
+    ``"days"`` (soonest collection first), or ``"alpha"`` (label
+    alphabetically).  Default ``"default"``."""
     hide_icon: bool
     """Suppress the row icons."""
 

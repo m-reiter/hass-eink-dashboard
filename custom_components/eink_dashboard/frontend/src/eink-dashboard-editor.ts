@@ -178,6 +178,7 @@ export const WIDGET_TYPES: Record<string, WidgetTypeMeta> = {
       entries: [],
       layout: "list",
       show_all: false,
+      sort: "default",
       card_style: DEFAULT_CARD_STYLE,
     },
   },
@@ -1357,6 +1358,20 @@ export const SCHEMAS: Record<
           default: false,
           selector: { boolean: {} },
         },
+        {
+          name: "sort",
+          default: "default",
+          selector: {
+            select: {
+              options: [
+                { value: "default", label: "Default (config order)" },
+                { value: "days", label: "Soonest first" },
+                { value: "alpha", label: "Alphabetical" },
+              ],
+              mode: "dropdown",
+            },
+          },
+        },
       ],
     },
     {
@@ -2111,6 +2126,7 @@ export const LABELS: Record<string, string> = {
   row_height: "Max row height",
   layout: "Layout",
   show_all: "Show all upcoming dates",
+  sort: "Sort order",
   entries: "Entries",
   forecast_days: "Forecast days",
   temperature_entity: "Temperature sensor",
