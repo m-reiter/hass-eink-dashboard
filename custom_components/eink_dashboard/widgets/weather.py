@@ -242,14 +242,14 @@ def _build_detail_items(
         raw_details.append(
             (
                 "barometer",
-                f"{_fmt(str(round(pressure)), config)}{pressure_unit}",
+                f"{_fmt(str(round(pressure)), config)}\u202f{pressure_unit}",
             )
         )
     if wind is not None:
         raw_details.append(
             (
                 "wind",
-                f"{_fmt(str(round(wind)), config)}{wind_unit}",
+                f"{_fmt(str(round(wind)), config)}\u202f{wind_unit}",
             )
         )
     if cloud_coverage is not None:
@@ -620,7 +620,7 @@ def _build_weather_context(
         if lo_val is not None:
             today_lo = f"{_fmt_temp(lo_val, nf, lang)}°"
         if p_val is not None:
-            today_precip = f"{_fmt(str(p_val), config)}{precip_unit_fc}"
+            today_precip = f"{_fmt(str(p_val), config)}\u202f{precip_unit_fc}"
 
     # Cap font_xl so temp text doesn't overlap the hi/lo column.
     font_xl_size = _cap_weather_font_xl(
