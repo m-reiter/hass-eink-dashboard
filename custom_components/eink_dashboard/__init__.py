@@ -540,10 +540,14 @@ async def _fetch_forecasts(
         if not isinstance(eid, str) or not eid or eid not in states:
             continue
         if w.get("type") == WidgetType.WEATHER:
-            if w.get("forecast_type") == "hourly":
+            # Always fetch daily forecast (for "today" section)
+            weather_entities.add(eid)
+            # Fetch hourly only if needed (forecast strip + show_forecast)
+            forecast_type = w.get("forecast_type", "daily")
+            mode = w.get("mode", "full")
+            show_forecast = mode != "current"
+            if forecast_type == "hourly" and show_forecast:
                 meteogram_entities.add(eid)
-            else:
-                weather_entities.add(eid)
         elif w.get("type") == WidgetType.METEOGRAM:
             meteogram_entities.add(eid)
 

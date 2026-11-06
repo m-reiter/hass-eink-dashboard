@@ -504,11 +504,13 @@ def _build_weather_context(
     # sliver.
     show_current = show_current or not has_forecast
 
-    # Today min/max gradient bar, "current" mode only.  Uses
-    # forecast[0] directly (not has_forecast, which reflects the
-    # forecast-strip's own visibility) so the bar still renders
-    # even though "current" mode always hides the strip.
-    today_forecast = forecast[0] if forecast else None
+    # Today min/max gradient bar, "current" mode only.  Uses the
+    # daily forecast (not the strip forecast, which may be hourly)
+    # so the bar still renders even though "current" mode always
+    # hides the strip.  The daily forecast is fetched for all
+    # weather widgets regardless of forecast_type.
+    daily_forecast = attrs.get("forecast", [])
+    today_forecast = daily_forecast[0] if daily_forecast else None
     bar_lo = _none_if_empty(
         today_forecast.get("templow") if today_forecast else None
     )
@@ -649,11 +651,10 @@ def _build_weather_context(
     lo_y = vis_top + round(temp_h * _WX_LO_Y_FRAC)
     precip_y = vis_top + round(temp_h * _WX_PRECIP_Y_FRAC)
     precip_unit_fc = attrs.get("precipitation_unit", "mm")
-    if forecast:
-        today = forecast[0]
-        hi_val = today.get("temperature")
-        lo_val = today.get("templow")
-        p_val = today.get("precipitation")
+    if today_forecast:
+        hi_val = today_forecast.get("temperature")
+        lo_val = today_forecast.get("templow")
+        p_val = today_forecast.get("precipitation")
         if hi_val is not None:
             today_hi = f"{_fmt_temp(hi_val, nf, lang)}°"
         if lo_val is not None:
@@ -750,8 +751,8 @@ def _build_weather_context(
             row_y += feels_like_h
 
         today_date = (
-            datetime.fromisoformat(forecast[0]["datetime"]).date()
-            if forecast
+            datetime.fromisoformat(today_forecast["datetime"]).date()
+            if today_forecast and today_forecast.get("datetime")
             else _get_today()
         )
         date_text = _babel_format_date(today_date, "EEEE, yyyy-MM-dd", lang)
