@@ -1029,7 +1029,7 @@ class TestRenderWeather:
             self._font_widget(fonts={"precip": {"weight": "bold"}}),
             self._config(),
         )
-        assert 'font-weight="bold"' in _text_element(svg, "0mm")
+        assert 'font-weight="bold"' in _text_element(svg, "0\u202fmm")
 
     def test_weather_default_detail_and_precip_are_regular(self) -> None:
         # Detail and precip default to regular weight; the
@@ -1037,7 +1037,7 @@ class TestRenderWeather:
         svg = render_widget_svg(self._font_widget(), self._config())
         assert svg.count('font-weight="bold"') == 1
         assert 'font-weight="400"' in _text_element(svg, "24°")
-        assert 'font-weight="400"' in _text_element(svg, "0mm")
+        assert 'font-weight="400"' in _text_element(svg, "0\u202fmm")
 
     def test_weather_fonts_size_override_ignored(self) -> None:
         # Weather geometry is coupled to font_size, so the roles
