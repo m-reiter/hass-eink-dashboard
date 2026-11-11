@@ -5,7 +5,7 @@
           status: >
             {% set weekdays = [
               "Montag", "Dienstag", "Mittwoch", "Donnerstag",
-              "Freitag", "Samstag", "Sonntag"
+              "Freitag", "Samstag", "Sonntag", "Montag"
             ] %}
             {% set days = state_attr('sensor.fes_abfuhrtermine_fes_anstehend', 'daysTo') | int(0) %}
             {% set now = now() %}
@@ -19,7 +19,7 @@
               {% if now.hour >= 4 %}
                 Morgen
               {% else %}
-                Morgen ({{ weekdays[now.weekday()] }})
+                Morgen ({{ weekdays[now.weekday()+1] }})
               {% endif %}
             {% else %}
               none
