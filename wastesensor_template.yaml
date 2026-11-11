@@ -3,19 +3,23 @@
         state: "{{ states('sensor.fes_abfuhrtermine_fes_anstehend') }}"
         attributes:
           status: >
+            {% set weekdays = [
+              "Montag", "Dienstag", "Mittwoch", "Donnerstag",
+              "Freitag", "Samstag", "Sonntag"
+            ] %}
             {% set days = state_attr('sensor.fes_abfuhrtermine_fes_anstehend', 'daysTo') | int(0) %}
             {% set now = now() %}
             {% if days == 0 %}
               {% if now.hour >= 4 %}
                 Heute
               {% else %}
-                Morgen ({{ now.strftime('%A') }})
+                Morgen ({{ weekdays[now.weekday()] }})
               {% endif %}
             {% elif days == 1 %}
               {% if now.hour >= 4 %}
                 Morgen
               {% else %}
-                Morgen ({{ now.strftime('%A') }})
+                Morgen ({{ weekdays[now.weekday()] }})
               {% endif %}
             {% else %}
               none
