@@ -1,0 +1,22 @@
+  - sensor:
+      - name: "Müllabfuhr"
+        state: "{{ states('sensor.fes_abfuhrtermine_fes_anstehend') }}"
+        attributes:
+          status: >
+            {% set days = state_attr('sensor.fes_abfuhrtermine_fes_anstehend', 'daysTo') | int(0) %}
+            {% set now = now() %}
+            {% if days == 0 %}
+              {% if now.hour >= 4 %}
+                Heute
+              {% else %}
+                Morgen ({{ now.strftime('%A') }})
+              {% endif %}
+            {% elif days == 1 %}
+              {% if now.hour >= 4 %}
+                Morgen
+              {% else %}
+                Morgen ({{ now.strftime('%A') }})
+              {% endif %}
+            {% else %}
+              none
+            {% endif %}
