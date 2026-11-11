@@ -24,3 +24,11 @@
             {% else %}
               none
             {% endif %}
+          icon: >
+            {% set icon_map = {
+              "Restmüll": "mdi:trash-can",
+              "Biomüll": "mdi:leaf",
+              "Altpapier": "mdi:file-document-outline",
+              "Gelber Sack": "mdi:recycle",
+            } %}
+            {{ icon_map.get(states('sensor.fes_abfuhrtermine_fes_anstehend'), "mdi:trash-can-outline") }}
