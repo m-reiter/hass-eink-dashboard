@@ -95,6 +95,27 @@ def _resolve_entity_state(value: str, states: dict[str, Any]) -> str:
     return value
 
 
+def _condition_entity_id(condition: Condition) -> str | None:
+    """Return the entity ID a state/numeric_state condition targets.
+
+    HA's Lovelace conditions editor routes ``state`` and
+    ``numeric_state`` conditions through the core automation editor
+    whenever an entity is attached, which serialises the entity under
+    ``entity_id`` (the core automation key) rather than ``entity``
+    (the legacy Lovelace key) — nothing converts it back before the
+    condition is persisted.  ``entity_id`` is checked first to match
+    HA's own frontend evaluator (``validate-condition.ts``), which
+    uses the same precedence.
+
+    Args:
+        condition: Condition dict that may carry either key.
+
+    Returns:
+        The entity ID, or ``None`` if neither key is set.
+    """
+    return condition.get("entity_id") or condition.get("entity")
+
+
 def _check_state_condition(
     condition: Condition, states: dict[str, Any]
 ) -> bool:
@@ -102,7 +123,9 @@ def _check_state_condition(
 
     The entity's current state is looked up in ``states``; if the
     entity is absent its state is treated as ``"unknown"`` (matching
-    HA's behaviour).
+    HA's behaviour).  When ``attribute`` is set, the named attribute
+    value is used instead of the entity state, enabling conditions
+    on entity attributes.
 
     When ``state`` is provided the condition passes if the entity state
     is one of the given values.  When ``state_not`` is provided the
@@ -114,15 +137,26 @@ def _check_state_condition(
 
     Args:
         condition: Condition dict (may or may not have a ``condition``
-            key — legacy format without it is also accepted).
+            key — legacy format without it is also accepted).  May
+            carry an ``attribute`` key to check an entity attribute
+            instead of the entity state.
         states: Entity states dict from ``DisplayConfig["states"]``.
 
     Returns:
         True when the condition is satisfied.
     """
-    entity_id = condition.get("entity")
+    entity_id = _condition_entity_id(condition)
     if entity_id and entity_id in states:
-        entity_state = str(states[entity_id]["state"])
+        attribute = condition.get("attribute")
+        if attribute:
+            attr_value = (
+                states[entity_id]
+                .get("attributes", {})
+                .get(attribute, "unknown")
+            )
+            entity_state = str(attr_value)
+        else:
+            entity_state = str(states[entity_id]["state"])
     else:
         entity_state = "unknown"
 
@@ -158,15 +192,25 @@ def _check_numeric_state_condition(
     value is an entity ID it is resolved to that entity's numeric state.
 
     Args:
-        condition: Condition dict with optional ``entity``, ``above``,
-            and ``below`` keys.
+        condition: Condition dict with optional ``entity``/
+            ``entity_id``, ``attribute``, ``above``, and ``below``
+            keys.  When ``attribute`` is set, the named attribute
+            value is used instead of the entity state.
         states: Entity states dict from ``DisplayConfig["states"]``.
 
     Returns:
         True when the entity's numeric state satisfies all bounds.
     """
-    entity_id = condition.get("entity")
-    raw_state = states.get(entity_id, {}).get("state") if entity_id else None
+    entity_id = _condition_entity_id(condition)
+    attribute = condition.get("attribute")
+    if attribute and entity_id:
+        raw_state = (
+            states.get(entity_id, {}).get("attributes", {}).get(attribute)
+        )
+    else:
+        raw_state = (
+            states.get(entity_id, {}).get("state") if entity_id else None
+        )
     try:
         numeric_state = float(raw_state or "")
     except (TypeError, ValueError):

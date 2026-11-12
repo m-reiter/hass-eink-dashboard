@@ -291,19 +291,24 @@ const COLOR_OPTIONS = [
  * @returns Schema array with x and y number fields.
  */
 function posXY(d: DisplayConfig): HaFormSchema[] {
+  // Position and size fields take any whole pixel.  Dragging in the
+  // preview still snaps to the grid, but a typed value must reach
+  // the display's own edges, which need not fall on it (a Kindle
+  // Paperwhite is 758 px wide), and shift-drag edge snapping can
+  // produce off-grid values the form would otherwise reject.
   return [
     {
       name: "x",
       default: 24,
       selector: {
-        number: { min: 0, max: d.width, step: 8, mode: "box" },
+        number: { min: 0, max: d.width, step: 1, mode: "box" },
       },
     },
     {
       name: "y",
       default: 0,
       selector: {
-        number: { min: 0, max: d.height, step: 8, mode: "box" },
+        number: { min: 0, max: d.height, step: 1, mode: "box" },
       },
     },
   ];
@@ -321,7 +326,7 @@ function posXYW(d: DisplayConfig): HaFormSchema[] {
     {
       name: "w",
       selector: {
-        number: { min: 0, max: d.width, step: 8, mode: "box" },
+        number: { min: 0, max: d.width, step: 1, mode: "box" },
       },
     },
   ];
@@ -340,7 +345,7 @@ function posXYWH(d: DisplayConfig): HaFormSchema[] {
       name: "h",
       selector: {
         number: {
-          min: 20, max: d.height, step: 8, mode: "box",
+          min: 20, max: d.height, step: 1, mode: "box",
         },
       },
     },
@@ -482,6 +487,69 @@ function hideIconSelector(): HaFormSchema {
     name: "hide_icon",
     default: false,
     selector: { boolean: {} },
+  };
+}
+
+/**
+ * Entities list: one object per row, with an optional display name.
+ *
+ * A plain entity ID in stored config is coerced to ``{ entity }``
+ * before the form sees it. Divider and section rows pass through
+ * unchanged so YAML-only rows are not dropped on save.
+ *
+ * @param entries - Stored ``entities`` list (strings or row objects).
+ * @returns Rows safe to bind to the object selector.
+ */
+export function normalizeEntitiesRows(
+  entries: readonly unknown[],
+): unknown[] {
+  return entries.map((entry) => {
+    if (typeof entry === "string") {
+      return { entity: entry };
+    }
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return entry;
+    }
+    const row = { ...(entry as Record<string, unknown>) };
+    if (typeof row.name === "string" && row.name.trim() === "") {
+      delete row.name;
+    }
+    return row;
+  });
+}
+
+/**
+ * Entities-list field: entity picker plus a display-name override.
+ *
+ * Matches HA's Entities card, where each row can replace the
+ * entity's friendly name with a label chosen for the dashboard.
+ *
+ * @returns A single ha-form schema entry.
+ */
+function entitiesListSelector(): HaFormSchema {
+  return {
+    name: "entities",
+    selector: {
+      object: {
+        multiple: true,
+        label_field: "entity",
+        description_field: "name",
+        fields: {
+          entity: {
+            label: "Entity",
+            required: true,
+            selector: { entity: {} },
+          },
+          name: {
+            label: "Display name",
+            description:
+              "Replaces the entity name on this row. "
+              + "Leave empty to use the friendly name.",
+            selector: { text: {} },
+          },
+        },
+      },
+    },
   };
 }
 
@@ -842,7 +910,7 @@ export const SCHEMAS: Record<
               default: 24,
               selector: {
                 number: {
-                  min: 0, max: d.width, step: 8, mode: "box",
+                  min: 0, max: d.width, step: 1, mode: "box",
                 },
               },
             },
@@ -851,7 +919,7 @@ export const SCHEMAS: Record<
               default: 0,
               selector: {
                 number: {
-                  min: 0, max: d.height, step: 8, mode: "box",
+                  min: 0, max: d.height, step: 1, mode: "box",
                 },
               },
             },
@@ -861,7 +929,7 @@ export const SCHEMAS: Record<
                 number: {
                   min: 0,
                   max: Math.max(d.width, d.height),
-                  step: 8,
+                  step: 1,
                   mode: "box",
                 },
               },
@@ -1079,10 +1147,7 @@ export const SCHEMAS: Record<
       icon: "mdi:format-list-bulleted",
       schema: [
         { name: "title", selector: { text: {} } },
-        {
-          name: "entities",
-          selector: { entity: { multiple: true } },
-        },
+        entitiesListSelector(),
         decimalsSelector(),
       ],
     },
@@ -2880,6 +2945,15 @@ class EinkDashboardEditor extends HTMLElement {
     if ("color" in formData && formData.color !== undefined) {
       formData.color = String(formData.color);
     }
+    // The object selector edits row objects. Stored entity IDs are
+    // still plain strings; coerce them so each row can take a name
+    // without the selector spreading a string into character keys.
+    if (
+      widget.type === "entities"
+      && Array.isArray(formData.entities)
+    ) {
+      formData.entities = normalizeEntitiesRows(formData.entities);
+    }
 
     const form =
       document.createElement("ha-form") as unknown as HaFormElement;
@@ -2906,6 +2980,14 @@ class EinkDashboardEditor extends HTMLElement {
         }
         if ("fill_color" in data && data.fill_color !== undefined) {
           data.fill_color = parseInt(String(data.fill_color), 10) || 0;
+        }
+        // Drop a cleared display name so the row falls back to the
+        // entity's friendly name instead of rendering a blank label.
+        if (
+          widget.type === "entities"
+          && Array.isArray(data.entities)
+        ) {
+          data.entities = normalizeEntitiesRows(data.entities);
         }
         const cur = this._widgets[index] as
           unknown as Record<string, unknown>;
