@@ -179,7 +179,7 @@ def _build_flex_context(
                 else FontWeight.REGULAR
             )
             text = _resolve_text(el, entity)
-            lines = text.split("\n") if text else [""]
+            lines = text.split("\\n") if text else [""]
             line_height = el.get("line_height", round(font_size * 1.2))
 
             align = el.get("align", "left")
@@ -196,13 +196,16 @@ def _build_flex_context(
                 text_color = color_to_hex(COLOR_BLACK)
 
             valign = el.get("valign", "top")
-            total_h = font_size + (len(lines) - 1) * line_height
+            dominant_baseline = {"top": "hanging", "middle": "middle", "bottom": "auto"}.get(
+                valign, "hanging"
+            )
+            line_span = (len(lines) - 1) * line_height
             if valign == "top":
-                y_offset = total_h
-            elif valign == "middle":
-                y_offset = total_h // 2
-            else:  # bottom
                 y_offset = 0
+            elif valign == "middle":
+                y_offset = -line_span // 2
+            else:  # bottom
+                y_offset = -line_span
 
             resolved.append(
                 {
@@ -215,6 +218,7 @@ def _build_flex_context(
                     "color": text_color,
                     "align": align,
                     "anchor": anchor,
+                    "dominant_baseline": dominant_baseline,
                     "line_height": line_height,
                 }
             )

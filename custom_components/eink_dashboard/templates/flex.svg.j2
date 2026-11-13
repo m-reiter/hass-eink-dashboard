@@ -29,7 +29,7 @@
       font-weight="{{ el.weight }}"
       font-size="{{ el.font_size | font_px }}"
       text-anchor="{{ el.anchor }}"
-      dominant-baseline="auto"
+      dominant-baseline="{{ el.dominant_baseline }}"
       fill="{{ el.color }}">{{ line }}</text>
     {%- endfor -%}
   {%- endif -%}
