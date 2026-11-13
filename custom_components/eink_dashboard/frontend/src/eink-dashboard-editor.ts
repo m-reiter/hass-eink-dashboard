@@ -419,6 +419,30 @@ function cardStyleSelector(): HaFormSchema {
 }
 
 /**
+ * Border width override (px). Only applies when card_style is "border".
+ *
+ * @returns A single ha-form schema entry.
+ */
+function borderWidthSelector(): HaFormSchema {
+  return {
+    name: "border_width",
+    selector: { number: { min: 1, max: 40, step: 1, mode: "box" } },
+  };
+}
+
+/**
+ * Border corner radius override (px). Only applies when card_style is "border".
+ *
+ * @returns A single ha-form schema entry.
+ */
+function borderRadiusSelector(): HaFormSchema {
+  return {
+    name: "border_radius",
+    selector: { number: { min: 0, max: 200, step: 2, mode: "box" } },
+  };
+}
+
+/**
  * Weather display mode dropdown selector.
  *
  * @returns A single ha-form schema entry.
@@ -1006,6 +1030,8 @@ export const SCHEMAS: Record<
       schema: [
         fontSizeSelector(FONT_SIZE_WEATHER),
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         fontsSection(
           [
             ["temp", "Temperature"],
@@ -1067,6 +1093,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         iconStyleSelector(),
         fontsSection([
           ["primary", "Primary"],
@@ -1124,6 +1152,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         iconStyleSelector(),
         namePositionSelector(),
         nameAlignSelector(),
@@ -1170,6 +1200,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         iconStyleSelector(),
         hideIconSelector(),
         dividerWidthSelector(),
@@ -1231,6 +1263,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         iconStyleSelector("none"),
         headingAlignSelector(),
         fontsSection([
@@ -1284,6 +1318,8 @@ export const SCHEMAS: Record<
       schema: [
         colorSelector(),
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         fontsSection([["label", "Label"]]),
       ],
     },
@@ -1397,6 +1433,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         iconStyleSelector(),
         fontsSection([
           ["name", "Name"],
@@ -1476,6 +1514,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         hideIconSelector(),
         dividerWidthSelector(),
         fontsSection([
@@ -1595,6 +1635,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         hideIconSelector(),
         dividerWidthSelector(),
         fontsSection([
@@ -1696,6 +1738,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         fontsSection([
           ["value", "Value"],
           ["unit", "Unit"],
@@ -2047,6 +2091,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         fontsSection([
           ["name", "Name"],
           ["value", "Value"],
@@ -2135,6 +2181,8 @@ export const SCHEMAS: Record<
           selector: { boolean: {} },
         },
         cardStyleSelector(),
+        borderWidthSelector(),
+        borderRadiusSelector(),
         fontsSection([
           ["day", "Day"],
           ["hour", "Hour"],
@@ -2190,8 +2238,12 @@ export const LABELS: Record<string, string> = {
   title: "Title",
   x: "X", y: "Y", w: "Width", h: "Height",
   fill_color: "Fill color",
-  border_width: "Border width",
-  border_radius: "Corner radius",
+  border_width:
+    "Border stroke width in px. Only applies when card_style "
+    + "is 'border'. Leave empty for default.",
+  border_radius:
+    "Border corner radius in px. Only applies when card_style "
+    + "is 'border'. Leave empty for default.",
   direction: "Direction", style: "Style", length: "Length",
   font_size: "Font size",
   size: "Size",
