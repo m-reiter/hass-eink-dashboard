@@ -468,8 +468,10 @@ export interface FlexElement {
   icon_size?: number;
   /** Icon circle style. */
   icon_style?: "filled" | "outlined" | "none";
-  /** Data source: "state", "attribute:name", or "static:text". */
+  /** Data source: "state", "attribute", or "static". */
   source?: string;
+  /** Attribute name when source is "attribute". */
+  attribute?: string;
   /** Literal text when source is "static". */
   static_text?: string;
   /** Font size in pixels. */

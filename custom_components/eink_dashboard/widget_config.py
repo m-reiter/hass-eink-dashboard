@@ -605,14 +605,17 @@ class FlexElement(TypedDict, total=False):
     """Top edge relative to the widget in pixels."""
     # Icon-specific:
     icon: str
-    """MDI icon name (static override). If omitted, resolved from the entity."""
+    """MDI icon name (static override). If omitted, resolved
+    from the entity."""
     icon_size: int
     """Icon glyph size in pixels (default: from metrics)."""
     icon_style: str
     """``"filled"``, ``"outlined"`` or ``"none"``."""
     # Text-specific:
     source: str
-    """Data source: ``"state"``, ``"attribute:name"`` or ``"static:text"``."""
+    """Data source: ``"state"``, ``"attribute"`` or ``"static"``."""
+    attribute: str
+    """Attribute name when ``source`` is ``"attribute"``."""
     static_text: str
     """Literal text when ``source`` is ``"static"``."""
     font_size: int
@@ -622,9 +625,11 @@ class FlexElement(TypedDict, total=False):
     color: str
     """``"black"``, ``"gray"`` or ``"white"``."""
     align: str
-    """Horizontal text alignment: ``"left"``, ``"center"`` or ``"right"``."""
+    """Horizontal text alignment: ``"left"``, ``"center"`` or
+    ``"right"``."""
     valign: str
-    """Vertical alignment for multi-line text: ``"top"``, ``"middle"`` or ``"bottom"``."""
+    """Vertical alignment for multi-line text: ``"top"``,
+    ``"middle"`` or ``"bottom"``."""
     line_height: int
     """Line spacing for multi-line text (default: font_size * 1.2)."""
 

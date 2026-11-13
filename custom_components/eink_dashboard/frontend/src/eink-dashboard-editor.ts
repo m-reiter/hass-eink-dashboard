@@ -568,6 +568,144 @@ function entitiesListSelector(): HaFormSchema {
 }
 
 /**
+ * Flex elements list: icon or text elements with position and styling.
+ *
+ * @returns A single ha-form schema entry.
+ */
+function elementsListSelector(): HaFormSchema {
+  return {
+    name: "elements",
+    selector: {
+      object: {
+        multiple: true,
+        label_field: "type",
+        fields: {
+          type: {
+            label: "Type",
+            required: true,
+            selector: {
+              select: {
+                options: [
+                  { value: "icon", label: "Icon" },
+                  { value: "text", label: "Text" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          x: {
+            label: "X position",
+            selector: { number: { min: 0, max: 500, mode: "box" } },
+          },
+          y: {
+            label: "Y position",
+            selector: { number: { min: 0, max: 500, mode: "box" } },
+          },
+          icon: {
+            label: "Icon (MDI name, e.g. mdi:trash-can)",
+            selector: { text: {} },
+          },
+          icon_size: {
+            label: "Icon size",
+            selector: { number: { min: 8, max: 64, mode: "box" } },
+          },
+          icon_style: {
+            label: "Icon style",
+            selector: {
+              select: {
+                options: [
+                  { value: "none", label: "None" },
+                  { value: "filled", label: "Filled" },
+                  { value: "outlined", label: "Outlined" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          source: {
+            label: "Text source",
+            selector: {
+              select: {
+                options: [
+                  { value: "state", label: "Entity state" },
+                  { value: "attribute", label: "Attribute" },
+                  { value: "static", label: "Static text" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          static_text: {
+            label: "Static text",
+            selector: { text: {} },
+          },
+          attribute: {
+            label: "Attribute name",
+            selector: { text: {} },
+          },
+          font_size: {
+            label: "Font size",
+            selector: { number: { min: 8, max: 48, mode: "box" } },
+          },
+          weight: {
+            label: "Font weight",
+            selector: {
+              select: {
+                options: [
+                  { value: "regular", label: "Regular" },
+                  { value: "medium", label: "Medium" },
+                  { value: "bold", label: "Bold" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          color: {
+            label: "Text color",
+            selector: {
+              select: {
+                options: [
+                  { value: "black", label: "Black" },
+                  { value: "gray", label: "Gray" },
+                  { value: "white", label: "White" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          align: {
+            label: "Horizontal alignment",
+            selector: {
+              select: {
+                options: [
+                  { value: "left", label: "Left" },
+                  { value: "center", label: "Center" },
+                  { value: "right", label: "Right" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          valign: {
+            label: "Vertical alignment",
+            selector: {
+              select: {
+                options: [
+                  { value: "top", label: "Top" },
+                  { value: "middle", label: "Middle" },
+                  { value: "bottom", label: "Bottom" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
+/**
  * Pixel width of the dividers between list rows (default 1).
  *
  * @returns A single ha-form schema entry.
@@ -2141,6 +2279,7 @@ export const SCHEMAS: Record<
           required: true,
           selector: { entity: {} },
         },
+        elementsListSelector(),
       ],
     },
     {

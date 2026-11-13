@@ -62,9 +62,12 @@ def _resolve_text(
     source = element.get("source", "state")
     if source == "static":
         return str(element.get("static_text", ""))
+    attrs = getattr(entity, "attrs", {}) or {}
+    if source == "attribute":
+        attr_name = element.get("attribute", "")
+        return str(attrs.get(attr_name, ""))
     if source.startswith("attribute:"):
         attr_name = source.split(":", 1)[1].strip()
-        attrs = getattr(entity, "attrs", {}) or {}
         return str(attrs.get(attr_name, ""))
     # Default: state
     state_val = getattr(entity, "state_val", None)
