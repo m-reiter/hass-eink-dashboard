@@ -592,3 +592,52 @@ class MeteogramWidget(WidgetBase, total=False):
     """Temperature curve width in pixels."""
     day_label_format: str
     """``DayLabelFormat`` value for the day labels."""
+
+
+class FlexElement(TypedDict, total=False):
+    """A single element in a flex widget."""
+
+    type: str
+    """``"icon"`` or ``"text"``."""
+    x: int
+    """Left edge relative to the widget in pixels."""
+    y: int
+    """Top edge relative to the widget in pixels."""
+    # Icon-specific:
+    icon: str
+    """MDI icon name (static override). If omitted, resolved from the entity."""
+    icon_size: int
+    """Icon glyph size in pixels (default: from metrics)."""
+    icon_style: str
+    """``"filled"``, ``"outlined"`` or ``"none"``."""
+    # Text-specific:
+    source: str
+    """Data source: ``"state"``, ``"attribute:name"`` or ``"static:text"``."""
+    static_text: str
+    """Literal text when ``source`` is ``"static"``."""
+    font_size: int
+    """Font size in pixels (default: from metrics)."""
+    weight: str
+    """``"regular"``, ``"medium"`` or ``"bold"``."""
+    color: str
+    """``"black"``, ``"gray"`` or ``"white"``."""
+    align: str
+    """Horizontal text alignment: ``"left"``, ``"center"`` or ``"right"``."""
+    valign: str
+    """Vertical alignment for multi-line text: ``"top"``, ``"middle"`` or ``"bottom"``."""
+    line_height: int
+    """Line spacing for multi-line text (default: font_size * 1.2)."""
+
+
+class FlexWidget(WidgetBase, total=False):
+    """Flexible widget with freely positioned elements."""
+
+    type: str  # "flex"
+    entity: str
+    """HA entity ID whose state/attributes provide data."""
+    elements: list[FlexElement]
+    """List of elements to render (icon or text)."""
+    default_font_size: int
+    """Default font size for text elements without explicit size."""
+    default_icon_size: int
+    """Default icon size for icon elements without explicit size."""

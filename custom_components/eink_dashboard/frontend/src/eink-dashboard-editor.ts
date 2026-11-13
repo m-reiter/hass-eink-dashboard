@@ -272,6 +272,21 @@ export const WIDGET_TYPES: Record<string, WidgetTypeMeta> = {
       card_style: DEFAULT_CARD_STYLE,
     },
   },
+  flex: {
+    label: "Flex",
+    description: "Freely positioned elements from an entity",
+    icon: "mdi:view-dashboard",
+    defaults: {
+      type: "flex",
+      x: 24,
+      y: 0,
+      w: 216,
+      h: 116,
+      entity: "",
+      card_style: "border",
+      elements: [],
+    },
+  },
 };
 
 // ── ha-form schema builders ──────────────────────────────────────
@@ -2111,6 +2126,42 @@ export const SCHEMAS: Record<
       ],
     },
   ],
+  flex: (d) => [
+    identitySection(),
+    {
+      name: "content",
+      type: "expandable",
+      flatten: true,
+      expanded: true,
+      title: "Content",
+      icon: "mdi:view-dashboard",
+      schema: [
+        {
+          name: "entity",
+          required: true,
+          selector: { entity: {} },
+        },
+      ],
+    },
+    {
+      name: "layout_pos",
+      type: "expandable",
+      flatten: true,
+      title: "Layout",
+      icon: "mdi:move-resize",
+      schema: [{ type: "grid", name: "", schema: posXYWH(d) }],
+    },
+    {
+      name: "appearance",
+      type: "expandable",
+      flatten: true,
+      title: "Appearance",
+      icon: "mdi:palette",
+      schema: [
+        cardStyleSelector(),
+      ],
+    },
+  ],
 };
 
 export const HELPERS: Record<string, string> = {
@@ -2296,7 +2347,7 @@ export function getSummary(widget: Widget): string {
   if (
     t === "weather" || t === "tile" || t === "entity"
     || t === "sensor" || t === "calendar" || t === "gauge"
-    || t === "meteogram" || t === "week_calendar"
+    || t === "meteogram" || t === "week_calendar" || t === "flex"
   ) {
     const entity = widget.entity;
     const label = Array.isArray(entity) ? entity.join(", ") : entity;

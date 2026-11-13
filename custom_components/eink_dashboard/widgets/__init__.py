@@ -29,6 +29,7 @@ from .entities import (
     _build_entities_context,
 )
 from .entity import _build_entity_context
+from .flex import _build_flex_context
 from .frame import _build_frame_context
 from .gauge import _build_gauge_context
 from .graph import _build_graph_context
@@ -48,6 +49,7 @@ __all__ = [
     "_build_device_battery_context",
     "_build_entities_context",
     "_build_entity_context",
+    "_build_flex_context",
     "_build_frame_context",
     "_build_gauge_context",
     "_build_graph_context",

@@ -454,6 +454,53 @@ export interface FrameWidget extends WidgetBase {
   border_radius?: number;
 }
 
+/** A single element in a flex widget. */
+export interface FlexElement {
+  /** Element type. */
+  type: "icon" | "text";
+  /** Left edge relative to the widget in pixels. */
+  x?: number;
+  /** Top edge relative to the widget in pixels. */
+  y?: number;
+  /** MDI icon name (static override). If omitted, resolved from entity. */
+  icon?: string;
+  /** Icon glyph size in pixels. */
+  icon_size?: number;
+  /** Icon circle style. */
+  icon_style?: "filled" | "outlined" | "none";
+  /** Data source: "state", "attribute:name", or "static:text". */
+  source?: string;
+  /** Literal text when source is "static". */
+  static_text?: string;
+  /** Font size in pixels. */
+  font_size?: number;
+  /** Font weight. */
+  weight?: "regular" | "medium" | "bold";
+  /** Text color. */
+  color?: "black" | "gray" | "white";
+  /** Horizontal text alignment. */
+  align?: "left" | "center" | "right";
+  /** Vertical alignment for multi-line text. */
+  valign?: "top" | "middle" | "bottom";
+  /** Line spacing for multi-line text. */
+  line_height?: number;
+}
+
+/** Flexible widget with freely positioned elements. */
+export interface FlexWidget extends WidgetBase {
+  type: "flex";
+  /** HA entity ID whose state/attributes provide data. */
+  entity?: string;
+  /** Decorative frame style. */
+  card_style?: CardStyle;
+  /** List of elements to render. */
+  elements?: FlexElement[];
+  /** Default font size for text elements without explicit size. */
+  default_font_size?: number;
+  /** Default icon size for icon elements without explicit size. */
+  default_icon_size?: number;
+}
+
 /** Horizontal or vertical dividing line. */
 export interface SeparatorWidget extends WidgetBase {
   type: "separator";
@@ -1495,6 +1542,7 @@ export type Widget =
   | SensorWidget
   | GaugeWidget
   | GraphWidget
+  | FlexWidget
   | MeteogramWidget;
 
 /** Registry entry for one widget type shown in the widget picker grid. */
