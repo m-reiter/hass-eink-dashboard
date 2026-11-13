@@ -213,7 +213,7 @@ class TestRenderEntity:
                 "h": h,
                 "entity": "sensor.temperature",
                 "card_style": "border",
-                "border_width": 5,
+                "card_border_width": 5,
             }
         ]
         svg = render_widget_svg(widgets[0], self._config())
@@ -230,7 +230,7 @@ class TestRenderEntity:
                 "h": h,
                 "entity": "sensor.temperature",
                 "card_style": "border",
-                "border_radius": 10,
+                "card_border_radius": 10,
             }
         ]
         svg = render_widget_svg(widgets[0], self._config())

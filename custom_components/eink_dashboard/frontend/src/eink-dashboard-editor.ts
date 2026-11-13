@@ -178,7 +178,6 @@ export const WIDGET_TYPES: Record<string, WidgetTypeMeta> = {
       entries: [],
       layout: "list",
       show_all: false,
-      sort: "default",
       card_style: DEFAULT_CARD_STYLE,
     },
   },
@@ -423,9 +422,9 @@ function cardStyleSelector(): HaFormSchema {
  *
  * @returns A single ha-form schema entry.
  */
-function borderWidthSelector(): HaFormSchema {
+function cardBorderWidthSelector(): HaFormSchema {
   return {
-    name: "border_width",
+    name: "card_border_width",
     selector: { number: { min: 1, max: 40, step: 1, mode: "box" } },
   };
 }
@@ -435,9 +434,9 @@ function borderWidthSelector(): HaFormSchema {
  *
  * @returns A single ha-form schema entry.
  */
-function borderRadiusSelector(): HaFormSchema {
+function cardBorderRadiusSelector(): HaFormSchema {
   return {
-    name: "border_radius",
+    name: "card_border_radius",
     selector: { number: { min: 0, max: 200, step: 2, mode: "box" } },
   };
 }
@@ -985,24 +984,6 @@ export const SCHEMAS: Record<
           selector: { number: { min: 0, max: 14, mode: "box" } },
         },
         {
-          name: "forecast_type",
-          default: "daily",
-          selector: {
-            select: {
-              options: [
-                { value: "daily", label: "Daily" },
-                { value: "hourly", label: "Hourly" },
-              ],
-              mode: "dropdown",
-            },
-          },
-        },
-        {
-          name: "forecast_hours",
-          default: 12,
-          selector: { number: { min: 1, max: 24, mode: "box" } },
-        },
-        {
           name: "temperature_entity",
           selector: { entity: { domain: "sensor" } },
         },
@@ -1030,8 +1011,8 @@ export const SCHEMAS: Record<
       schema: [
         fontSizeSelector(FONT_SIZE_WEATHER),
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection(
           [
             ["temp", "Temperature"],
@@ -1043,7 +1024,7 @@ export const SCHEMAS: Record<
       ],
     },
   ],
-  
+
   tile: (d) => [
     identitySection(),
     {
@@ -1093,8 +1074,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector(),
         fontsSection([
           ["primary", "Primary"],
@@ -1152,8 +1133,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector(),
         namePositionSelector(),
         nameAlignSelector(),
@@ -1200,8 +1181,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector(),
         hideIconSelector(),
         dividerWidthSelector(),
@@ -1263,8 +1244,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector("none"),
         headingAlignSelector(),
         fontsSection([
@@ -1318,8 +1299,8 @@ export const SCHEMAS: Record<
       schema: [
         colorSelector(),
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection([["label", "Label"]]),
       ],
     },
@@ -1433,8 +1414,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector(),
         fontsSection([
           ["name", "Name"],
@@ -1479,20 +1460,6 @@ export const SCHEMAS: Record<
           default: false,
           selector: { boolean: {} },
         },
-        {
-          name: "sort",
-          default: "default",
-          selector: {
-            select: {
-              options: [
-                { value: "default", label: "Default (config order)" },
-                { value: "days", label: "Soonest first" },
-                { value: "alpha", label: "Alphabetical" },
-              ],
-              mode: "dropdown",
-            },
-          },
-        },
       ],
     },
     {
@@ -1514,8 +1481,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         hideIconSelector(),
         dividerWidthSelector(),
         fontsSection([
@@ -1635,8 +1602,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         hideIconSelector(),
         dividerWidthSelector(),
         fontsSection([
@@ -1738,8 +1705,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection([
           ["value", "Value"],
           ["unit", "Unit"],
@@ -2091,8 +2058,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection([
           ["name", "Name"],
           ["value", "Value"],
@@ -2181,8 +2148,8 @@ export const SCHEMAS: Record<
           selector: { boolean: {} },
         },
         cardStyleSelector(),
-        borderWidthSelector(),
-        borderRadiusSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection([
           ["day", "Day"],
           ["hour", "Hour"],
@@ -2222,6 +2189,12 @@ export const HELPERS: Record<string, string> = {
     + "(dotted on black-and-white displays).",
   y_axis_unit:
     "Append the unit (or the Unit override) to the value labels.",
+  card_border_width:
+    "Border stroke width in px. Only applies when card_style "
+    + "is 'border'. Leave empty for default.",
+  card_border_radius:
+    "Border corner radius in px. Only applies when card_style "
+    + "is 'border'. Leave empty for default.",
 };
 
 export const LABELS: Record<string, string> = {
@@ -2238,12 +2211,8 @@ export const LABELS: Record<string, string> = {
   title: "Title",
   x: "X", y: "Y", w: "Width", h: "Height",
   fill_color: "Fill color",
-  border_width:
-    "Border stroke width in px. Only applies when card_style "
-    + "is 'border'. Leave empty for default.",
-  border_radius:
-    "Border corner radius in px. Only applies when card_style "
-    + "is 'border'. Leave empty for default.",
+  border_width: "Border width",
+  border_radius: "Corner radius",
   direction: "Direction", style: "Style", length: "Length",
   font_size: "Font size",
   size: "Size",
@@ -2256,16 +2225,15 @@ export const LABELS: Record<string, string> = {
   heading_align: "Heading alignment",
   badges: "Badges",
   card_style: "Card style",
+  card_border_width: "Border width",
+  card_border_radius: "Border radius",
   icon_style: "Icon style",
   divider_width: "Divider width",
   row_height: "Max row height",
   layout: "Layout",
   show_all: "Show all upcoming dates",
-  sort: "Sort order",
   entries: "Entries",
   forecast_days: "Forecast days",
-  forecast_type: "Forecast type",
-  forecast_hours: "Forecast hours",
   temperature_entity: "Temperature sensor",
   humidity_entity: "Humidity sensor",
   mode: "Mode",

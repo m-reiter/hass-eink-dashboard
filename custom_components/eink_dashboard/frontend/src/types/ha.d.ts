@@ -428,9 +428,9 @@ interface WidgetBase {
   /** Foreground color as a grayscale integer (0 = black, 255 = white). */
   color?: number;
   /** Card border stroke width in px (default: heuristic). */
-  border_width?: number;
+  card_border_width?: number;
   /** Card border corner radius in px (default: heuristic). */
-  border_radius?: number;
+  card_border_radius?: number;
   /**
    * HA conditions that control widget visibility.
    * The widget is hidden when any condition evaluates to false.
@@ -478,12 +478,8 @@ export interface WeatherWidget extends WidgetBase {
   type: "weather";
   /** HA weather entity ID. */
   entity?: string;
-  /** Number of forecast days to display (0-14). */
+  /** Number of forecast days to display (0–14). */
   forecast_days?: number;
-  /** Forecast type: "daily" (default) or "hourly". */
-  forecast_type?: "daily" | "hourly";
-  /** Number of hourly forecast entries (default 12, only for hourly). */
-  forecast_hours?: number;
   /**
    * Optional sensor entity that overrides the weather entity's
    * temperature attribute. When set, the sensor's state is used
@@ -619,8 +615,6 @@ export interface WasteScheduleWidget extends WidgetBase {
    * falls within the next 3 days.  When true, always shows all entries.
    */
   show_all?: boolean;
-  /** Sort order for the visible entries. */
-  sort?: "default" | "days" | "alpha";
   /** Decorative frame style. */
   card_style?: CardStyle;
   /**

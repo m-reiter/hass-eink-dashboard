@@ -747,10 +747,10 @@ def render_widget_svg(
         ctx = _SVG_RENDERERS[wtype](widget, config)
         # Allow explicit border overrides (fall back to heuristic
         # when not set).
-        if widget.get("border_width") is not None:
-            ctx["m_border"] = widget["border_width"]
-        if widget.get("border_radius") is not None:
-            ctx["m_radius"] = widget["border_radius"]
+        if widget.get("card_border_width") is not None:
+            ctx["m_border"] = widget["card_border_width"]
+        if widget.get("card_border_radius") is not None:
+            ctx["m_radius"] = widget["card_border_radius"]
         ctx["font_family_name"] = selected_family
         tmpl = _jinja_env.get_template(f"{wtype}.svg.j2")
         svg = tmpl.render(**ctx)

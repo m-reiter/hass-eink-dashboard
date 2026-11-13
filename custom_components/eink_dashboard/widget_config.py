@@ -101,9 +101,9 @@ class WidgetBase(TypedDict, total=False):
     """Per-role font overrides; roles are widget-specific."""
     card_style: str
     """``"border"``, ``"left_bar"`` or ``"none"``."""
-    border_width: int
+    card_border_width: int
     """Card border stroke width in px (default: heuristic)."""
-    border_radius: int
+    card_border_radius: int
     """Card border corner radius in px (default: heuristic)."""
     visibility: list[Condition]
     """Conditions that must all hold for the widget to render."""
@@ -510,13 +510,6 @@ class WeatherWidget(WidgetBase, total=False):
     """Base font size in pixels."""
     forecast_days: int
     """Number of forecast days to draw."""
-    forecast_type: str
-    """``"daily"`` (default) or ``"hourly"``.  When ``"hourly"``, the
-    forecast shows hour labels and a single temperature per entry
-    instead of day labels with hi/lo temperatures."""
-    forecast_hours: int
-    """Number of hourly forecast entries to draw (default 12).
-    Only used when ``forecast_type`` is ``"hourly"``."""
     mode: str
     """``"full"``, ``"forecast"`` or ``"current"``."""
     temperature_entity: str
@@ -554,10 +547,6 @@ class WasteScheduleWidget(WidgetBase, ListFields, total=False):
     """``"list"`` or ``"card"``."""
     show_all: bool
     """Show every collection, not only the next one."""
-    sort: str
-    """Sort order for visible entries: ``"default"`` (config order),
-    ``"days"`` (soonest collection first), or ``"alpha"`` (label
-    alphabetically).  Default ``"default"``."""
     hide_icon: bool
     """Suppress the row icons."""
 
