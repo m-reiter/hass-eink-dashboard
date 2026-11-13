@@ -202,6 +202,40 @@ class TestRenderEntity:
         img = render_to_image(widgets, self._config())
         assert_card_border(img, 400, h, m)
 
+    def test_entity_border_width_override(self) -> None:
+        h = 112
+        widgets = [
+            {
+                "type": "entity",
+                "x": 0,
+                "y": 0,
+                "w": 400,
+                "h": h,
+                "entity": "sensor.temperature",
+                "card_style": "border",
+                "border_width": 5,
+            }
+        ]
+        svg = render_widget_svg(widgets[0], self._config())
+        assert 'stroke-width="5"' in svg
+
+    def test_entity_border_radius_override(self) -> None:
+        h = 112
+        widgets = [
+            {
+                "type": "entity",
+                "x": 0,
+                "y": 0,
+                "w": 400,
+                "h": h,
+                "entity": "sensor.temperature",
+                "card_style": "border",
+                "border_radius": 10,
+            }
+        ]
+        svg = render_widget_svg(widgets[0], self._config())
+        assert 'rx="10"' in svg
+
     def test_entity_card_left_bar(self) -> None:
         # Left_bar style draws gray pixels on the left edge;
         # the right edge should be white.

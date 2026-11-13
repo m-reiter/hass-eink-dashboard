@@ -427,6 +427,10 @@ interface WidgetBase {
   fonts?: WidgetFonts;
   /** Foreground color as a grayscale integer (0 = black, 255 = white). */
   color?: number;
+  /** Card border stroke width in px (default: heuristic). */
+  border_width?: number;
+  /** Card border corner radius in px (default: heuristic). */
+  border_radius?: number;
   /**
    * HA conditions that control widget visibility.
    * The widget is hidden when any condition evaluates to false.
