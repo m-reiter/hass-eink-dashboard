@@ -101,6 +101,10 @@ class WidgetBase(TypedDict, total=False):
     """Per-role font overrides; roles are widget-specific."""
     card_style: str
     """``"border"``, ``"left_bar"`` or ``"none"``."""
+    card_border_width: int
+    """Card border stroke width in px (default: heuristic)."""
+    card_border_radius: int
+    """Card border corner radius in px (default: heuristic)."""
     visibility: list[Condition]
     """Conditions that must all hold for the widget to render."""
 

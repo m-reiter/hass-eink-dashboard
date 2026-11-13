@@ -418,6 +418,30 @@ function cardStyleSelector(): HaFormSchema {
 }
 
 /**
+ * Border width override (px). Only applies when card_style is "border".
+ *
+ * @returns A single ha-form schema entry.
+ */
+function cardBorderWidthSelector(): HaFormSchema {
+  return {
+    name: "card_border_width",
+    selector: { number: { min: 1, max: 40, step: 1, mode: "box" } },
+  };
+}
+
+/**
+ * Border corner radius override (px). Only applies when card_style is "border".
+ *
+ * @returns A single ha-form schema entry.
+ */
+function cardBorderRadiusSelector(): HaFormSchema {
+  return {
+    name: "card_border_radius",
+    selector: { number: { min: 0, max: 200, step: 2, mode: "box" } },
+  };
+}
+
+/**
  * Weather display mode dropdown selector.
  *
  * @returns A single ha-form schema entry.
@@ -987,6 +1011,8 @@ export const SCHEMAS: Record<
       schema: [
         fontSizeSelector(FONT_SIZE_WEATHER),
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection(
           [
             ["temp", "Temperature"],
@@ -1048,6 +1074,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector(),
         fontsSection([
           ["primary", "Primary"],
@@ -1105,6 +1133,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector(),
         namePositionSelector(),
         nameAlignSelector(),
@@ -1151,6 +1181,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector(),
         hideIconSelector(),
         dividerWidthSelector(),
@@ -1212,6 +1244,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector("none"),
         headingAlignSelector(),
         fontsSection([
@@ -1265,6 +1299,8 @@ export const SCHEMAS: Record<
       schema: [
         colorSelector(),
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection([["label", "Label"]]),
       ],
     },
@@ -1378,6 +1414,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector(),
         fontsSection([
           ["name", "Name"],
@@ -1443,6 +1481,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         hideIconSelector(),
         dividerWidthSelector(),
         fontsSection([
@@ -1562,6 +1602,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         hideIconSelector(),
         dividerWidthSelector(),
         fontsSection([
@@ -1663,6 +1705,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection([
           ["value", "Value"],
           ["unit", "Unit"],
@@ -2014,6 +2058,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection([
           ["name", "Name"],
           ["value", "Value"],
@@ -2102,6 +2148,8 @@ export const SCHEMAS: Record<
           selector: { boolean: {} },
         },
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         fontsSection([
           ["day", "Day"],
           ["hour", "Hour"],
@@ -2141,6 +2189,12 @@ export const HELPERS: Record<string, string> = {
     + "(dotted on black-and-white displays).",
   y_axis_unit:
     "Append the unit (or the Unit override) to the value labels.",
+  card_border_width:
+    "Border stroke width in px. Only applies when card_style "
+    + "is 'border'. Leave empty for default.",
+  card_border_radius:
+    "Border corner radius in px. Only applies when card_style "
+    + "is 'border'. Leave empty for default.",
 };
 
 export const LABELS: Record<string, string> = {
@@ -2171,6 +2225,8 @@ export const LABELS: Record<string, string> = {
   heading_align: "Heading alignment",
   badges: "Badges",
   card_style: "Card style",
+  card_border_width: "Border width",
+  card_border_radius: "Border radius",
   icon_style: "Icon style",
   divider_width: "Divider width",
   row_height: "Max row height",
