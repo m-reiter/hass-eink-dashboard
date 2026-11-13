@@ -197,11 +197,11 @@ def _build_flex_context(
 
             valign = el.get("valign", "top")
             if valign == "middle":
-                total_h = len(lines) * line_height
+                total_h = font_size + (len(lines) - 1) * line_height
                 y_offset = -total_h // 2
             elif valign == "bottom":
-                total_h = len(lines) * line_height
-                y_offset = -total_h + line_height
+                total_h = font_size + (len(lines) - 1) * line_height
+                y_offset = -total_h
             else:
                 y_offset = 0
 
