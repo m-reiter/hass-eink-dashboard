@@ -196,13 +196,12 @@ def _build_flex_context(
                 text_color = color_to_hex(COLOR_BLACK)
 
             valign = el.get("valign", "top")
-            if valign == "middle":
-                total_h = font_size + (len(lines) - 1) * line_height
-                y_offset = -total_h // 2
-            elif valign == "bottom":
-                total_h = font_size + (len(lines) - 1) * line_height
-                y_offset = -total_h
-            else:
+            total_h = font_size + (len(lines) - 1) * line_height
+            if valign == "top":
+                y_offset = total_h
+            elif valign == "middle":
+                y_offset = total_h // 2
+            else:  # bottom
                 y_offset = 0
 
             resolved.append(
