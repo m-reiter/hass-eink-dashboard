@@ -196,9 +196,12 @@ def _build_flex_context(
                 text_color = color_to_hex(COLOR_BLACK)
 
             valign = el.get("valign", "top")
-            dominant_baseline = {"top": "hanging", "middle": "middle", "bottom": "auto"}.get(
-                valign, "hanging"
-            )
+            _baseline_map = {
+                "top": "hanging",
+                "middle": "middle",
+                "bottom": "auto",
+            }
+            dominant_baseline = _baseline_map.get(valign, "hanging")
             line_span = (len(lines) - 1) * line_height
             if valign == "top":
                 y_offset = 0
