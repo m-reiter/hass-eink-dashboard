@@ -179,7 +179,7 @@ def _build_flex_context(
                 else FontWeight.REGULAR
             )
             text = _resolve_text(el, entity)
-            lines = text.split("\\n") if text else [""]
+            lines = text.replace("\\n", "\n").split("\n") if text else [""]
             line_height = el.get("line_height", round(font_size * 1.2))
 
             align = el.get("align", "left")
