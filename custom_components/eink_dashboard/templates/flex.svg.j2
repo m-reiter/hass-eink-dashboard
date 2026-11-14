@@ -1,0 +1,39 @@
+{%- from "_macros.svg.j2" import card_container with context -%}
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="{{ w }}" height="{{ h }}">
+{%- if has_entity -%}
+{%- call card_container(
+    x=0, y=0, w=w, h=h,
+    card_style=card_style,
+    radius=m_radius, border=m_border,
+    bar_width=bar_width,
+    border_color=hex_black,
+    bar_color=hex_gray) -%}
+{%- for el in elements -%}
+  {%- if el.type == "icon" and (el.icon_svg or el.letter) -%}
+    <g transform="translate({{ el.x }}, {{ el.y }})">
+      {%- if el.icon_svg -%}
+      {{ el.icon_svg }}
+      {%- elif el.letter -%}
+      <text x="{{ el.icon_size // 2 }}" y="{{ el.icon_size // 2 }}"
+            font-size="{{ el.letter_font_sz | font_px }}"
+            text-anchor="middle" dominant-baseline="central"
+            fill="{{ hex_gray }}">{{ el.letter }}</text>
+      {%- endif -%}
+    </g>
+  {%- elif el.type == "text" -%}
+    {%- for line in el.lines -%}
+    <text
+      x="{{ el.x }}" y="{{ el.y + loop.index0 * el.line_height }}"
+      font-family="{{ el.font_size | font_family(font_family_name) }}"
+      font-weight="{{ el.weight }}"
+      font-size="{{ el.font_size | font_px }}"
+      text-anchor="{{ el.anchor }}"
+      dominant-baseline="{{ el.dominant_baseline }}"
+      fill="{{ el.color }}">{{ line }}</text>
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- endcall -%}
+{%- endif -%}
+</svg>

@@ -272,6 +272,21 @@ export const WIDGET_TYPES: Record<string, WidgetTypeMeta> = {
       card_style: DEFAULT_CARD_STYLE,
     },
   },
+  flex: {
+    label: "Flex",
+    description: "Freely positioned elements from an entity",
+    icon: "mdi:view-dashboard",
+    defaults: {
+      type: "flex",
+      x: 24,
+      y: 0,
+      w: 216,
+      h: 116,
+      entity: "",
+      card_style: "border",
+      elements: [],
+    },
+  },
 };
 
 // ── ha-form schema builders ──────────────────────────────────────
@@ -569,6 +584,144 @@ function entitiesListSelector(): HaFormSchema {
               "Replaces the entity name on this row. "
               + "Leave empty to use the friendly name.",
             selector: { text: {} },
+          },
+        },
+      },
+    },
+  };
+}
+
+/**
+ * Flex elements list: icon or text elements with position and styling.
+ *
+ * @returns A single ha-form schema entry.
+ */
+function elementsListSelector(): HaFormSchema {
+  return {
+    name: "elements",
+    selector: {
+      object: {
+        multiple: true,
+        label_field: "type",
+        fields: {
+          type: {
+            label: "Type",
+            required: true,
+            selector: {
+              select: {
+                options: [
+                  { value: "icon", label: "Icon" },
+                  { value: "text", label: "Text" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          x: {
+            label: "X position",
+            selector: { number: { min: 0, max: 500, mode: "box" } },
+          },
+          y: {
+            label: "Y position",
+            selector: { number: { min: 0, max: 500, mode: "box" } },
+          },
+          icon: {
+            label: "Icon (MDI name, e.g. mdi:trash-can)",
+            selector: { text: {} },
+          },
+          icon_size: {
+            label: "Icon size",
+            selector: { number: { min: 8, max: 64, mode: "box" } },
+          },
+          icon_style: {
+            label: "Icon style",
+            selector: {
+              select: {
+                options: [
+                  { value: "none", label: "None" },
+                  { value: "filled", label: "Filled" },
+                  { value: "outlined", label: "Outlined" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          source: {
+            label: "Text source",
+            selector: {
+              select: {
+                options: [
+                  { value: "state", label: "Entity state" },
+                  { value: "attribute", label: "Attribute" },
+                  { value: "static", label: "Static text" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          static_text: {
+            label: "Static text",
+            selector: { text: {} },
+          },
+          attribute: {
+            label: "Attribute name",
+            selector: { text: {} },
+          },
+          font_size: {
+            label: "Font size",
+            selector: { number: { min: 8, max: 48, mode: "box" } },
+          },
+          weight: {
+            label: "Font weight",
+            selector: {
+              select: {
+                options: [
+                  { value: "regular", label: "Regular" },
+                  { value: "medium", label: "Medium" },
+                  { value: "bold", label: "Bold" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          color: {
+            label: "Text color",
+            selector: {
+              select: {
+                options: [
+                  { value: "black", label: "Black" },
+                  { value: "gray", label: "Gray" },
+                  { value: "white", label: "White" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          align: {
+            label: "Horizontal alignment",
+            selector: {
+              select: {
+                options: [
+                  { value: "left", label: "Left" },
+                  { value: "center", label: "Center" },
+                  { value: "right", label: "Right" },
+                ],
+                mode: "dropdown",
+              },
+            },
+          },
+          valign: {
+            label: "Vertical alignment",
+            selector: {
+              select: {
+                options: [
+                  { value: "top", label: "Top" },
+                  { value: "middle", label: "Middle" },
+                  { value: "bottom", label: "Bottom" },
+                ],
+                mode: "dropdown",
+              },
+            },
           },
         },
       },
@@ -2159,6 +2312,45 @@ export const SCHEMAS: Record<
       ],
     },
   ],
+  flex: (d) => [
+    identitySection(),
+    {
+      name: "content",
+      type: "expandable",
+      flatten: true,
+      expanded: true,
+      title: "Content",
+      icon: "mdi:view-dashboard",
+      schema: [
+        {
+          name: "entity",
+          required: true,
+          selector: { entity: {} },
+        },
+        elementsListSelector(),
+      ],
+    },
+    {
+      name: "layout_pos",
+      type: "expandable",
+      flatten: true,
+      title: "Layout",
+      icon: "mdi:move-resize",
+      schema: [{ type: "grid", name: "", schema: posXYWH(d) }],
+    },
+    {
+      name: "appearance",
+      type: "expandable",
+      flatten: true,
+      title: "Appearance",
+      icon: "mdi:palette",
+      schema: [
+        cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
+      ],
+    },
+  ],
 };
 
 export const HELPERS: Record<string, string> = {
@@ -2352,7 +2544,7 @@ export function getSummary(widget: Widget): string {
   if (
     t === "weather" || t === "tile" || t === "entity"
     || t === "sensor" || t === "calendar" || t === "gauge"
-    || t === "meteogram" || t === "week_calendar"
+    || t === "meteogram" || t === "week_calendar" || t === "flex"
   ) {
     const entity = widget.entity;
     const label = Array.isArray(entity) ? entity.join(", ") : entity;
