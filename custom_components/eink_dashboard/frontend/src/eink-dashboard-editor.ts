@@ -433,6 +433,30 @@ function cardStyleSelector(): HaFormSchema {
 }
 
 /**
+ * Border width override (px). Only applies when card_style is "border".
+ *
+ * @returns A single ha-form schema entry.
+ */
+function cardBorderWidthSelector(): HaFormSchema {
+  return {
+    name: "card_border_width",
+    selector: { number: { min: 1, max: 40, step: 1, mode: "box" } },
+  };
+}
+
+/**
+ * Border corner radius override (px). Only applies when card_style is "border".
+ *
+ * @returns A single ha-form schema entry.
+ */
+function cardBorderRadiusSelector(): HaFormSchema {
+  return {
+    name: "card_border_radius",
+    selector: { number: { min: 0, max: 200, step: 2, mode: "box" } },
+  };
+}
+
+/**
  * Weather display mode dropdown selector.
  *
  * @returns A single ha-form schema entry.
@@ -2298,6 +2322,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
       ],
     },
   ],
