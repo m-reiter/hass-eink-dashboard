@@ -638,12 +638,10 @@ class FlexElement(TypedDict, total=False):
     """Line spacing for multi-line text (default: font_size * 1.2)."""
 
 
-class FlexWidget(WidgetBase, total=False):
+class FlexWidget(WidgetBase, EntityFields, total=False):
     """Flexible widget with freely positioned elements."""
 
     type: str  # "flex"
-    entity: str
-    """HA entity ID whose state/attributes provide data."""
     elements: list[FlexElement]
     """List of elements to render (icon or text)."""
     default_font_size: int
