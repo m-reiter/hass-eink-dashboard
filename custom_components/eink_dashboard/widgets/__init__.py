@@ -34,6 +34,7 @@ from .frame import _build_frame_context
 from .gauge import _build_gauge_context
 from .graph import _build_graph_context
 from .heading import _build_heading_context
+from .list import _build_list_context
 from .meteogram import _build_meteogram_context
 from .sensor import _build_sensor_context
 from .separator import _build_separator_context
@@ -54,6 +55,7 @@ __all__ = [
     "_build_gauge_context",
     "_build_graph_context",
     "_build_heading_context",
+    "_build_list_context",
     "_build_meteogram_context",
     "_build_sensor_context",
     "_build_separator_context",

@@ -1533,6 +1533,32 @@ export interface MeteogramWidget extends WidgetBase {
   card_style?: CardStyle;
 }
 
+export interface ListWidget extends WidgetBase {
+  type: "list";
+  /** HA entity ID whose state provides the list data. */
+  entity?: string;
+  /** Decorative frame style. */
+  card_style?: CardStyle;
+  /** MDI icon override. */
+  icon?: string;
+  /** Icon circle style. */
+  icon_style?: IconStyle;
+  /** Attribute name holding the comma-separated list. */
+  source?: string;
+  /** Separator for splitting the list (default: ", "). */
+  separator?: string;
+  /** Maximum number of items to show. */
+  max_items?: number;
+  /** Suppress the icon. */
+  hide_icon?: boolean;
+  /** Header override (default: entity state). */
+  name?: string;
+  /** Maximum row height in pixels (default: config row_height). */
+  row_height?: number;
+  /** Per-role font overrides; roles: "title", "primary". */
+  fonts?: WidgetFonts;
+}
+
 export type Widget =
   | FrameWidget
   | SeparatorWidget
@@ -1549,7 +1575,8 @@ export type Widget =
   | GaugeWidget
   | GraphWidget
   | FlexWidget
-  | MeteogramWidget;
+  | MeteogramWidget
+  | ListWidget;
 
 /** Registry entry for one widget type shown in the widget picker grid. */
 export interface WidgetTypeMeta {

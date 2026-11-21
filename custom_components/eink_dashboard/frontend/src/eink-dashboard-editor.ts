@@ -287,6 +287,19 @@ export const WIDGET_TYPES: Record<string, WidgetTypeMeta> = {
       elements: [],
     },
   },
+  list: {
+    label: "List",
+    description: "Header and list of items from an entity attribute",
+    icon: "mdi:view-list-outline",
+    defaults: {
+      type: "list",
+      x: 24,
+      y: 0,
+      w: 216,
+      entity: "",
+      card_style: DEFAULT_CARD_STYLE,
+    },
+  },
 };
 
 // ── ha-form schema builders ──────────────────────────────────────
@@ -2351,6 +2364,70 @@ export const SCHEMAS: Record<
       ],
     },
   ],
+  list: (d) => [
+    identitySection(),
+    {
+      name: "content",
+      type: "expandable",
+      flatten: true,
+      expanded: true,
+      title: "Content",
+      icon: "mdi:view-list-outline",
+      schema: [
+        {
+          name: "entity",
+          required: true,
+          selector: { entity: {} },
+        },
+        elementsListSelector(),
+        {
+          name: "name",
+          description:
+            "Header override. Leave empty to use the entity state.",
+          selector: { text: {} },
+        },
+        {
+          name: "source",
+          description: "Attribute name holding the comma-separated list.",
+          selector: { text: {} },
+        },
+        {
+          name: "separator",
+          default: ", ",
+          selector: { text: {} },
+        },
+        {
+          name: "max_items",
+          selector: { number: { min: 1, max: 20, mode: "box" } },
+        },
+        hideIconSelector(),
+        rowHeightSelector(d),
+      ],
+    },
+    {
+      name: "layout_pos",
+      type: "expandable",
+      flatten: true,
+      title: "Layout",
+      icon: "mdi:move-resize",
+      schema: [{ type: "grid", name: "", schema: posXYWH(d) }],
+    },
+    {
+      name: "appearance",
+      type: "expandable",
+      flatten: true,
+      title: "Appearance",
+      icon: "mdi:palette",
+      schema: [
+        cardStyleSelector(),
+        iconStyleSelector(),
+        fontsSection([
+          ["title", "Header"],
+          ["primary", "Item"],
+        ]),
+      ],
+    },
+  ],
 };
 
 export const HELPERS: Record<string, string> = {
@@ -2361,6 +2438,14 @@ export const HELPERS: Record<string, string> = {
   divider_width:
     "Width of the lines between rows (default 1 px). "
     + "0 hides them.",
+  source:
+    "Attribute name on the entity holding the comma-separated list "
+    + "of items. Leave empty to use the first non-meta attribute.",
+  separator:
+    "Separator between list items (default \", \").",
+  max_items:
+    "Maximum number of items to show. If exceeded, shows one item "
+    + "fewer plus an \"+N weitere\" row.",
   show_all:
     "When off, the widget is empty if no collection falls "
     + "within the next 3 days.",
@@ -2425,6 +2510,9 @@ export const LABELS: Record<string, string> = {
   layout: "Layout",
   show_all: "Show all upcoming dates",
   entries: "Entries",
+  source: "Source attribute",
+  separator: "List separator",
+  max_items: "Max items",
   forecast_days: "Forecast days",
   temperature_entity: "Temperature sensor",
   humidity_entity: "Humidity sensor",

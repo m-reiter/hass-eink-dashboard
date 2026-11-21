@@ -1,0 +1,47 @@
+{%- from "_macros.svg.j2" import card_container, card_row with context -%}
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="{{ w }}" height="{{ h }}">
+{%- if has_rows -%}
+{%- call card_container(
+    x=0, y=0, w=w, h=h,
+    card_style=card_style,
+    radius=m_radius, border=m_border,
+    bar_width=bar_width,
+    border_color=hex_black, bar_color=hex_gray) -%}
+{%- for row in rows -%}
+{{ card_row(
+    x=x_off, y=row.y,
+    w=w - x_off - r_inset, row_h=row_h,
+    padding=m_padding, icon_dia=m_icon_dia,
+    inner_gap=m_inner_gap, border=icon_stroke_w,
+    font_primary=row.primary_font_sz,
+    font_secondary=secondary_font_sz,
+    font_value=value_font_sz,
+    icon_inner=row.icon_inner_sz,
+    letter_font_sz=m_font_letter,
+    primary=row.primary,
+    secondary=row.secondary,
+    value=row.value,
+    icon_svg=row.icon_svg,
+    icon_fill=row.icon_fill,
+    icon_outline=row.icon_outline,
+    icon_no_circle=row.icon_no_circle,
+    letter=row.letter,
+    primary_weight=row.primary_weight,
+    primary_fill=hex_black,
+    hide_icon=row.row_hide_icon,
+    lpad=lpad, rpad=rpad,
+    hex_black=hex_black, hex_white=hex_white) }}
+{%- if not loop.last and divider_stroke_w -%}
+<line class="eink-divider"
+  x1="{{ x_off + lpad }}"
+  y1="{{ row.y + row_h + divider_y_off }}"
+  x2="{{ w - r_inset - rpad }}"
+  y2="{{ row.y + row_h + divider_y_off }}"
+  stroke="{{ hex_gray }}"
+  stroke-width="{{ divider_stroke_w }}"/>
+{%- endif -%}
+{%- endfor -%}
+{%- endcall -%}
+{%- endif -%}
+</svg>

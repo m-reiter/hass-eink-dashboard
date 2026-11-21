@@ -648,3 +648,21 @@ class FlexWidget(WidgetBase, EntityFields, total=False):
     """Default font size for text elements without explicit size."""
     default_icon_size: int
     """Default icon size for icon elements without explicit size."""
+
+
+class ListWidget(WidgetBase, EntityFields, IconFields, total=False):
+    """List widget: title + list of text items from an entity attribute."""
+
+    type: str  # "list"
+    source: str
+    """Attribute name holding the comma-separated list."""
+    separator: str
+    """Separator for splitting the list (default: ``, ``)."""
+    max_items: int
+    """Maximum number of items to show (default: all)."""
+    hide_icon: bool
+    """Suppress the icon."""
+    name: str
+    """Title override (default: entity state)."""
+    layout: str
+    """``"list"`` (one per line) or ``"inline"`` (comma-separated)."""
