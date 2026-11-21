@@ -650,7 +650,9 @@ class FlexWidget(WidgetBase, EntityFields, total=False):
     """Default icon size for icon elements without explicit size."""
 
 
-class ListWidget(WidgetBase, EntityFields, IconFields, total=False):
+class ListWidget(
+    WidgetBase, EntityFields, IconFields, ListFields, total=False
+):
     """List widget: title + list of text items from an entity attribute."""
 
     type: str  # "list"
