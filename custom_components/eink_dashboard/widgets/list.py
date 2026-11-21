@@ -125,15 +125,12 @@ def _build_list_context(
     else:
         visible_items = items
 
-    if not visible_items and overflow == 0:
-        return empty_ctx
-
     # Number of rows: header + items + overflow.
     num_display_rows = (
         len(visible_items) + (1 if header else 0) + (1 if overflow > 0 else 0)
     )
     if num_display_rows < 1:
-        num_display_rows = 1
+        return empty_ctx
 
     svg_h = _widget_dim(
         widget,
