@@ -39,6 +39,8 @@ export const ICON_FALLBACK: Record<string, string> = {
   "mdi:gauge": "◎",
   "mdi:rectangle-outline": "□",
   "mdi:weather-cloudy": "☁",
+  "mdi:view-dashboard": "⊞",
+  "mdi:view-list-outline": "☰",
 };
 
 /**

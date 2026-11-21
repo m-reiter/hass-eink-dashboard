@@ -75,9 +75,10 @@ describe("WIDGET_TYPES", () => {
     "graph",
     "meteogram",
     "week_calendar",
+    "list",
   ];
 
-  it("has all 15 widget types", () => {
+  it("has all 16 widget types", () => {
     expect(Object.keys(WIDGET_TYPES).sort()).toEqual(
       ALL_TYPES.sort()
     );
@@ -136,9 +137,10 @@ describe("SCHEMAS", () => {
     "graph",
     "meteogram",
     "week_calendar",
+    "list",
   ];
 
-  it("has a schema builder for all 15 widget types", () => {
+  it("has a schema builder for all 16 widget types", () => {
     expect(Object.keys(SCHEMAS).sort()).toEqual(ALL_TYPES.sort());
   });
 
