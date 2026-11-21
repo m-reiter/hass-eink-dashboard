@@ -200,16 +200,19 @@ def _build_list_context(
     if not hide_icon:
         icon_override = widget.get("icon")
         domain = entity_id.split(".")[0] if entity_id else ""
+        icon_outline, icon_no_circle = _resolve_icon_style(
+            widget.get("icon_style"), display_levels=display_levels
+        )
+        # Without a circle the glyph is scaled to the full icon
+        # diameter so it appears the same size as with a circle.
+        icon_inner_sz = m.icon_dia if icon_no_circle else m.icon_inner
         icon_svg, icon_letter = _resolve_icon_svg(
             icon_override,
             attrs,
             str(entity.state_val or ""),
             domain,
-            m.icon_inner,
+            icon_inner_sz,
             entity_id=entity_id,
-        )
-        icon_outline, icon_no_circle = _resolve_icon_style(
-            widget.get("icon_style"), display_levels=display_levels
         )
 
     rows: list[dict[str, object]] = []
@@ -231,6 +234,9 @@ def _build_list_context(
         row_ctx["primary_font_sz"] = header_font_sz
         row_ctx["primary_weight"] = _font_weight_svg(header_weight)
         row_ctx["row_hide_icon"] = hide_icon
+        row_ctx["icon_inner_sz"] = (
+            icon_inner_sz if not hide_icon else m.icon_inner
+        )
         rows.append(row_ctx)
         row_idx += 1
 
@@ -250,6 +256,7 @@ def _build_list_context(
         row_ctx["primary_font_sz"] = primary_font_sz
         row_ctx["primary_weight"] = _font_weight_svg(primary_weight)
         row_ctx["row_hide_icon"] = True
+        row_ctx["icon_inner_sz"] = m.icon_inner
         rows.append(row_ctx)
         row_idx += 1
 
