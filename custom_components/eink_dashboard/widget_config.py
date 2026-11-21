@@ -592,3 +592,21 @@ class MeteogramWidget(WidgetBase, total=False):
     """Temperature curve width in pixels."""
     day_label_format: str
     """``DayLabelFormat`` value for the day labels."""
+
+
+class ListWidget(WidgetBase, EntityFields, total=False):
+    """List widget: title + list of text items from an entity attribute."""
+
+    type: str  # "list"
+    source: str
+    """Attribute name holding the comma-separated list."""
+    separator: str
+    """Separator for splitting the list (default: ``, ``)."""
+    max_items: int
+    """Maximum number of items to show (default: all)."""
+    hide_icon: bool
+    """Suppress the icon."""
+    name: str
+    """Title override (default: entity state)."""
+    layout: str
+    """``"list"`` (one per line) or ``"inline"`` (comma-separated)."""

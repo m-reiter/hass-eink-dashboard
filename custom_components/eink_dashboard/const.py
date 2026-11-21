@@ -576,6 +576,7 @@ class WidgetType(StrEnum):
     TILE = "tile"
     WEATHER = "weather"
     DEVICE_BATTERY = "device_battery"
+    LIST = "list"
     WASTE_SCHEDULE = "waste_schedule"
     CALENDAR = "calendar"
     METEOGRAM = "meteogram"
