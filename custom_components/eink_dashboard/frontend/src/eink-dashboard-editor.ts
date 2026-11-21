@@ -2420,6 +2420,8 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
         iconStyleSelector(),
         fontsSection([
           ["title", "Header"],
