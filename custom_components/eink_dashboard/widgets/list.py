@@ -38,6 +38,7 @@ from ._helpers import (
     _max_row_height,
     _metrics_context,
     _resolve_entity,
+    _resolve_icon_style,
     _resolve_icon_svg,
     _row_context,
     _widget_dim,
@@ -194,6 +195,8 @@ def _build_list_context(
     # Icon resolution for the header row.
     icon_svg = ""
     icon_letter = ""
+    icon_outline = False
+    icon_no_circle = hide_icon
     if not hide_icon:
         icon_override = widget.get("icon")
         domain = entity_id.split(".")[0] if entity_id else ""
@@ -204,6 +207,9 @@ def _build_list_context(
             domain,
             m.icon_inner,
             entity_id=entity_id,
+        )
+        icon_outline, icon_no_circle = _resolve_icon_style(
+            widget.get("icon_style"), display_levels=display_levels
         )
 
     rows: list[dict[str, object]] = []
@@ -216,8 +222,8 @@ def _build_list_context(
                 y=row_idx * row_h,
                 primary=header,
                 icon_svg=icon_svg,
-                icon_outline=False,
-                icon_no_circle=hide_icon,
+                icon_outline=icon_outline,
+                icon_no_circle=icon_no_circle or hide_icon,
                 letter=icon_letter,
                 icon_fill=color_to_hex(COLOR_BLACK),
             )

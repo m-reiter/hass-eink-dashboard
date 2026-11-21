@@ -594,7 +594,7 @@ class MeteogramWidget(WidgetBase, total=False):
     """``DayLabelFormat`` value for the day labels."""
 
 
-class ListWidget(WidgetBase, EntityFields, total=False):
+class ListWidget(WidgetBase, EntityFields, IconFields, total=False):
     """List widget: title + list of text items from an entity attribute."""
 
     type: str  # "list"

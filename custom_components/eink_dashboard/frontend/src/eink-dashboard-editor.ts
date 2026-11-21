@@ -2179,6 +2179,7 @@ export const SCHEMAS: Record<
       icon: "mdi:palette",
       schema: [
         cardStyleSelector(),
+        iconStyleSelector(),
         fontsSection([
           ["title", "Header"],
           ["primary", "Item"],

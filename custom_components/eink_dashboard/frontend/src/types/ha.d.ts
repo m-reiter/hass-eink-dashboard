@@ -1486,6 +1486,10 @@ export interface ListWidget extends WidgetBase {
   entity?: string;
   /** Decorative frame style. */
   card_style?: CardStyle;
+  /** MDI icon override. */
+  icon?: string;
+  /** Icon circle style. */
+  icon_style?: IconStyle;
   /** Attribute name holding the comma-separated list. */
   source?: string;
   /** Separator for splitting the list (default: ", "). */
