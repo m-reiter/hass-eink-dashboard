@@ -1023,11 +1023,11 @@ def render_dashboard(
         rel_x = widget.get("relative_to_x")
         rel_y = widget.get("relative_to_y")
         if rel_x and rel_x in bboxes:
-            wx = bboxes[rel_x]["x"] + bboxes[rel_x]["w"] + widget.get("x", 0)
+            wx = bboxes[rel_x]["x"] + bboxes[rel_x]["w"]
         else:
             wx = widget.get("x", PADDING)
         if rel_y and rel_y in bboxes:
-            wy = bboxes[rel_y]["y"] + bboxes[rel_y]["h"] + widget.get("y", 0)
+            wy = bboxes[rel_y]["y"] + bboxes[rel_y]["h"]
         else:
             wy = widget.get("y", 0)
         visibility = widget.get("visibility")
@@ -1049,6 +1049,12 @@ def render_dashboard(
                         "h": 0,
                     }
                 continue
+        # Only visible widgets apply their relative offsets to the
+        # origin; hidden widgets pass the origin through unchanged.
+        if rel_x and rel_x in bboxes:
+            wx += widget.get("x", 0)
+        if rel_y and rel_y in bboxes:
+            wy += widget.get("y", 0)
         _LOGGER.debug(
             "render_dashboard: SVG rendering type=%s at (%d,%d)",
             widget_type,
