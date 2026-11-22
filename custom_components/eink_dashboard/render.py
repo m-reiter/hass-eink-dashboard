@@ -28,6 +28,7 @@ from __future__ import annotations
 import functools
 import io
 import logging
+import re
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any
@@ -55,7 +56,7 @@ from .svg_render import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, Sequence
 
     from .widget_config import WidgetBase
 
@@ -955,6 +956,87 @@ def _is_event_now(start: str, end: str, now: datetime) -> bool:
     # Strip tz info if caller accidentally passed an aware datetime.
     now_naive = now.replace(tzinfo=None)
     return start_naive <= now_naive < end_naive
+
+
+def widget_svg_size(svg: str) -> tuple[int, int]:
+    """Extract the root viewport dimensions from a widget SVG string.
+
+    The widget templates emit ``width``/``height`` on the root
+    ``<svg>`` element, which is the first attribute pair matching
+    the pattern in the document.
+
+    Args:
+        svg: Rendered SVG document string.
+
+    Returns:
+        ``(width, height)`` in px, or ``(0, 0)`` when the root
+        element carries no such attributes.
+    """
+    m = re.search(r'width="(\d+)"\s+height="(\d+)"', svg)
+    if m is None:
+        return (0, 0)
+    return (int(m.group(1)), int(m.group(2)))
+
+
+def resolve_widget_positions(
+    widgets: Sequence[Mapping[str, Any]],
+    sizes: Sequence[tuple[int, int]],
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
+    """Resolve canvas positions and anchor origins for a widget list.
+
+    Mirrors the anchor rules of ``render_dashboard`` for the case
+    where every widget renders (editor preview, design tool): each
+    axis is the reference widget's edge plus the widget's own
+    offset, or the absolute value when no resolvable reference is
+    set.  ``render_dashboard`` additionally passes the origin
+    through unchanged for hidden widgets; that case does not arise
+    here because the preview renders every widget.
+
+    Args:
+        widgets: Widget config dicts in render order.
+        sizes: Rendered ``(width, height)`` per widget, in the same
+            order; provides the bounding boxes that later widgets
+            anchor against.
+
+    Returns:
+        ``(positions, origins)``: the resolved ``(x, y)`` canvas
+        position and the ``(origin_x, origin_y)`` reference edge
+        (0 on absolute axes) per widget.  Origins let drag
+        interactions convert between stored offsets and canvas
+        coordinates.
+    """
+    bboxes: dict[str, dict[str, int]] = {}
+    positions: list[tuple[int, int]] = []
+    origins: list[tuple[int, int]] = []
+    for widget, (w_px, h_px) in zip(widgets, sizes, strict=True):
+        rel_x = widget.get("relative_to_x")
+        rel_y = widget.get("relative_to_y")
+        origin_x = (
+            bboxes[rel_x]["x"] + bboxes[rel_x]["w"]
+            if rel_x and rel_x in bboxes
+            else 0
+        )
+        origin_y = (
+            bboxes[rel_y]["y"] + bboxes[rel_y]["h"]
+            if rel_y and rel_y in bboxes
+            else 0
+        )
+        wx = (
+            origin_x + widget.get("x", 0)
+            if rel_x and rel_x in bboxes
+            else widget.get("x", PADDING)
+        )
+        wy = (
+            origin_y + widget.get("y", 0)
+            if rel_y and rel_y in bboxes
+            else widget.get("y", 0)
+        )
+        positions.append((wx, wy))
+        origins.append((origin_x, origin_y))
+        label = widget.get("label")
+        if label:
+            bboxes[label] = {"x": wx, "y": wy, "w": w_px, "h": h_px}
+    return positions, origins
 
 
 def render_dashboard(

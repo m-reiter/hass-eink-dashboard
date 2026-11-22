@@ -169,6 +169,20 @@ export type WeatherMode = "full" | "forecast" | "current";
 /** Response from the eink_dashboard/render_widgets WebSocket command. */
 export interface RenderWidgetsResponse {
   svgs: string[];
+  /**
+   * Resolved canvas (x, y) per widget, in widget-list order;
+   * relative_to_x/y anchors applied by the backend.  Absent from
+   * older backends — callers must fall back to the widget's own
+   * x/y config values.
+   */
+  positions?: [number, number][];
+  /**
+   * Per-axis anchor origin per widget: (reference edge, 0) on
+   * relative axes and (0, 0) on absolute axes.  Drag interactions
+   * use these to convert between stored offsets and canvas
+   * coordinates.
+   */
+  origins?: [number, number][];
 }
 
 /** Response from the eink_dashboard/render_widget WebSocket command. */

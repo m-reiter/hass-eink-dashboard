@@ -77,6 +77,7 @@ from .data import (
     get_loaded_entry,
 )
 from .http import EinkLayoutView, EinkPublicImageView
+from .render import resolve_widget_positions, widget_svg_size
 from .store import EinkDashboardStore
 from .svg_render import render_widget_svg
 from .widgets.week_calendar import week_calendar_entity_ids
@@ -1058,7 +1059,20 @@ async def ws_render_widgets(
             str(exc),
         )
         return
-    connection.send_result(msg["id"], {"svgs": svgs})
+    # Resolve canvas positions with the same anchor rules the
+    # compositor uses so the editor preview places relative widgets
+    # correctly; origins let drag interactions convert stored
+    # offsets back to canvas coordinates.
+    sizes = [widget_svg_size(svg) for svg in svgs]
+    positions, origins = resolve_widget_positions(widgets, sizes)
+    connection.send_result(
+        msg["id"],
+        {
+            "svgs": svgs,
+            "positions": [list(p) for p in positions],
+            "origins": [list(o) for o in origins],
+        },
+    )
 
 
 _FRONTEND_DIR = Path(__file__).parent / "frontend"

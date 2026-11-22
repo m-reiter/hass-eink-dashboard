@@ -80,6 +80,10 @@ from custom_components.eink_dashboard.const import (
 from custom_components.eink_dashboard.optimize import (
     optimize_for_eink,
 )
+from custom_components.eink_dashboard.render import (
+    resolve_widget_positions,
+    widget_svg_size,
+)
 from custom_components.eink_dashboard.svg_render import (
     _compose_svg,
     _svg_to_png,
@@ -126,7 +130,8 @@ def _render_svg(widgets: list[dict], config: dict) -> str:
     """Render one or more widgets inside a dashboard-sized SVG canvas.
 
     Produces a full SVG document with a white background and each
-    widget positioned at its configured (x, y).
+    widget at its resolved canvas position (relative_to_x/y anchors
+    applied, same rules as ``render_dashboard``).
 
     Args:
         widgets: List of widget configuration dicts.
@@ -135,41 +140,11 @@ def _render_svg(widgets: list[dict], config: dict) -> str:
     Returns:
         SVG document string.
     """
-    svg_parts = []
-    positions = []
-    # Bounding boxes for relative widget positioning, keyed by the
-    # widget's editor-only label.
-    bboxes: dict[str, dict[str, int]] = {}
-    for widget in widgets:
-        # Relative positioning: resolve x/y from reference widgets.
-        rel_x = widget.get("relative_to_x")
-        rel_y = widget.get("relative_to_y")
-        if rel_x and rel_x in bboxes:
-            wx = bboxes[rel_x]["x"] + bboxes[rel_x]["w"] + widget.get("x", 0)
-        else:
-            wx = widget.get("x", PADDING)
-        if rel_y and rel_y in bboxes:
-            wy = bboxes[rel_y]["y"] + bboxes[rel_y]["h"] + widget.get("y", 0)
-        else:
-            wy = widget.get("y", 0)
-        svg = render_widget_svg(widget, config)
-        svg_parts.append(svg)
-        positions.append((wx, wy))
-        # Store the bounding box using the rendered SVG dimensions.
-        label = widget.get("label")
-        if label:
-            m = re.search(
-                r'width="(\d+)"\s+height="(\d+)"', svg
-            )
-            if m:
-                bboxes[label] = {
-                    "x": wx,
-                    "y": wy,
-                    "w": int(m.group(1)),
-                    "h": int(m.group(2)),
-                }
+    svgs = [render_widget_svg(widget, config) for widget in widgets]
+    sizes = [widget_svg_size(svg) for svg in svgs]
+    positions, _origins = resolve_widget_positions(widgets, sizes)
     return _compose_svg(
-        svg_parts,
+        svgs,
         positions,
         config["width"],
         config["height"],

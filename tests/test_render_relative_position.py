@@ -23,6 +23,11 @@ from __future__ import annotations
 
 from typing import ClassVar
 
+from custom_components.eink_dashboard.const import PADDING
+from custom_components.eink_dashboard.render import (
+    resolve_widget_positions,
+    widget_svg_size,
+)
 from tests.helpers import (
     assert_all_white,
     assert_has_dark_pixels,
@@ -169,3 +174,83 @@ class TestRelativePositioning:
         assert second is not None
         assert first[0] == 0
         assert second[0] == 100
+
+
+class TestResolveWidgetPositions:
+    """resolve_widget_positions mirrors the compositor anchor rules."""
+
+    def test_row_chain(self) -> None:
+        # Each frame anchors to the previous one's right edge.
+        widgets = [
+            _frame(x=24, y=0, label="one"),
+            _frame(x=0, y=0, label="two", relative_to_x="one"),
+            _frame(x=8, y=0, label="three", relative_to_x="two"),
+        ]
+        sizes = [(100, 50), (100, 50), (100, 50)]
+        positions, origins = resolve_widget_positions(widgets, sizes)
+        assert positions == [(24, 0), (124, 0), (232, 0)]
+        # Origins: reference edge on relative axes, 0 elsewhere.
+        assert origins == [(0, 0), (124, 0), (224, 0)]
+
+    def test_column_chain(self) -> None:
+        widgets = [
+            _frame(x=0, y=10, label="one"),
+            _frame(x=0, y=0, label="two", relative_to_y="one"),
+        ]
+        positions, _origins = resolve_widget_positions(
+            widgets, [(100, 50), (100, 50)]
+        )
+        assert positions == [(0, 10), (0, 60)]
+
+    def test_unknown_reference_falls_back_to_absolute(self) -> None:
+        widgets = [_frame(x=10, y=5, relative_to_x="ghost")]
+        positions, origins = resolve_widget_positions(
+            widgets, [(100, 50)]
+        )
+        assert positions == [(10, 5)]
+        assert origins == [(0, 0)]
+
+    def test_default_x_is_padding(self) -> None:
+        # Without relative_to_x an unset x falls back to PADDING,
+        # with relative_to_x an unset x offset is zero.
+        widgets = [
+            {"type": "frame", "y": 0, "w": 100, "h": 50, "label": "one"},
+            {
+                "type": "frame",
+                "y": 0,
+                "w": 100,
+                "h": 50,
+                "label": "two",
+                "relative_to_x": "one",
+            },
+        ]
+        positions, _origins = resolve_widget_positions(
+            widgets, [(100, 50), (100, 50)]
+        )
+        assert positions == [(PADDING, 0), (PADDING + 100, 0)]
+
+    def test_all_widgets_render_no_hidden_case(self) -> None:
+        # Unlike render_dashboard the preview helper treats every
+        # widget as rendered: offsets always apply.
+        widgets = [
+            _frame(x=0, y=0, label="one"),
+            _frame(x=4, y=4, label="two", relative_to_x="one"),
+        ]
+        positions, _origins = resolve_widget_positions(
+            widgets, [(100, 50), (100, 50)]
+        )
+        assert positions == [(0, 0), (104, 4)]
+
+
+class TestWidgetSvgSize:
+    """widget_svg_size extracts the root viewport dimensions."""
+
+    def test_parses_root_dimensions(self) -> None:
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg"'
+            ' width="216" height="112">'
+        )
+        assert widget_svg_size(svg) == (216, 112)
+
+    def test_missing_dimensions_returns_zero(self) -> None:
+        assert widget_svg_size("<svg/>") == (0, 0)

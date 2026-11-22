@@ -22,7 +22,6 @@ import type {
   EinkEditorElement,
   ConfigEntry,
   RenderWidgetsResponse,
-  RenderWidgetResponse,
   Handle,
   WidgetBounds,
 } from "./types/ha.js";
@@ -197,6 +196,12 @@ class EinkDashboardCard extends HTMLElement {
   // SVG rendering state
   private _widgetSvgs: string[] = [];
   private _renderedSvgs: string[] = [];
+  // Backend-resolved canvas positions and anchor origins; null
+  // until the first render_widgets response arrives (or when the
+  // backend predates the fields — callers then fall back to the
+  // widget's own x/y config values).
+  private _widgetPositions: [number, number][] | null = null;
+  private _widgetOrigins: [number, number][] | null = null;
   private _svgContainer: HTMLDivElement | null = null;
   private _scaleWrapper: HTMLDivElement | null = null;
   private _resizeObserver: ResizeObserver | null = null;
@@ -756,6 +761,8 @@ class EinkDashboardCard extends HTMLElement {
       const result = await this._fetchingSvgs;
       if (gen !== this._fetchGeneration || svg_gen != this._svgGeneration) return;
       this._widgetSvgs = result.svgs;
+      this._widgetPositions = result.positions ?? null;
+      this._widgetOrigins = result.origins ?? null;
       this._updateSvgDom();
     } catch (err) {
       console.error("Failed to fetch widget SVGs:", err);
@@ -804,14 +811,40 @@ class EinkDashboardCard extends HTMLElement {
         container.insertBefore(wrapper, this._handleEls[0] ?? null);
       }
       wrapper.dataset.index = String(i);
-      wrapper.style.left = `${w.x ?? 24}px`;
-      wrapper.style.top = `${w.y ?? 0}px`;
+      const pos = this._widgetPositions?.[i];
+      wrapper.style.left = `${pos ? pos[0] : (w.x ?? 24)}px`;
+      wrapper.style.top = `${pos ? pos[1] : (w.y ?? 0)}px`;
       const svg = this._widgetSvgs[i] ?? "";
       if (this._renderedSvgs[i] !== svg) {
         wrapper.innerHTML = svg;
         this._renderedSvgs[i] = svg;
       }
     }
+  }
+
+  /**
+   * Canvas position of a widget during pointer interactions.
+   *
+   * The backend-resolved positions are stale while the user drags
+   * or resizes, so the display position is computed live from the
+   * widget's stored values: on relative axes the stored value is
+   * an offset from the backend-provided anchor origin; on absolute
+   * axes it is the canvas coordinate itself.
+   *
+   * @param index - Widget index used to look up its anchor origin.
+   * @param w - Current widget state (offsets already updated).
+   * @returns Canvas x/y for CSS positioning.
+   */
+  private _interactionPos(
+    index: number,
+    w: Widget,
+  ): { x: number; y: number } {
+    const origin = this._widgetOrigins?.[index];
+    const ox = origin ? origin[0] : 0;
+    const oy = origin ? origin[1] : 0;
+    const x = w.relative_to_x ? ox + (w.x ?? 0) : (w.x ?? 24);
+    const y = w.relative_to_y ? oy + (w.y ?? 0) : (w.y ?? 0);
+    return { x, y };
   }
 
   // ── Server image toggle ───────────────────────────────────────────────────
@@ -1213,6 +1246,12 @@ class EinkDashboardCard extends HTMLElement {
       const { width: dw, height: dh } = this._layout.display;
       const handle = this._resizeHandle!;
       const wrapper = this._wrapperAt(this._resizeIndex);
+      // Anchor origins: on relative axes the stored x/y values are
+      // offsets, so resize math runs in canvas coordinates and
+      // results are converted back to offsets via the origin.
+      const origin = this._widgetOrigins?.[this._resizeIndex];
+      const ox = origin ? origin[0] : 0;
+      const oy = origin ? origin[1] : 0;
 
       if (w.type === "separator") {
         const sw = w as SeparatorWidget;
@@ -1220,14 +1259,18 @@ class EinkDashboardCard extends HTMLElement {
         const sLen = s.length ?? 0;
         if (handle === "start") {
           if (dir === "vertical") {
-            const endY = s.y + sLen;
-            const newY = snap(Math.max(0, Math.min(endY - 20, s.y + dy)));
-            sw.y = newY;
+            const endY = oy + s.y + sLen;
+            const newY = snap(
+              Math.max(0, Math.min(endY - 20, oy + s.y + dy)),
+            );
+            sw.y = newY - oy;
             sw.length = endY - newY;
           } else {
-            const endX = s.x + sLen;
-            const newX = snap(Math.max(0, Math.min(endX - 20, s.x + dx)));
-            sw.x = newX;
+            const endX = ox + s.x + sLen;
+            const newX = snap(
+              Math.max(0, Math.min(endX - 20, ox + s.x + dx)),
+            );
+            sw.x = newX - ox;
             sw.length = endX - newX;
           }
         } else if (handle === "end") {
@@ -1237,11 +1280,12 @@ class EinkDashboardCard extends HTMLElement {
         // CSS feedback for separator: update wrapper dimensions and
         // scale the SVG preview to match.
         if (wrapper) {
+          const pos = this._interactionPos(this._resizeIndex, w);
           if (dir === "vertical") {
-            wrapper.style.top = `${sw.y}px`;
+            wrapper.style.top = `${pos.y}px`;
             wrapper.style.height = `${sw.length}px`;
           } else {
-            wrapper.style.left = `${sw.x}px`;
+            wrapper.style.left = `${pos.x}px`;
             wrapper.style.width = `${sw.length}px`;
           }
           this._scaleSvgInWrapper(
@@ -1254,14 +1298,13 @@ class EinkDashboardCard extends HTMLElement {
         // Edge handles: width-only resize.
         const startW = s.w ?? wrapper?.offsetWidth ?? MIN_RESIZE_DIM;
         const r = applyEdgeResize(
-          handle as "w" | "e", dx, s.x, startW, dw, MIN_RESIZE_DIM,
+          handle as "w" | "e", dx, ox + s.x, startW, dw, MIN_RESIZE_DIM,
         );
-        if (r.x !== undefined) w.x = r.x;
+        if (r.x !== undefined) w.x = r.x - ox;
         w.w = r.w;
         if (wrapper) {
-          // "e" handle doesn't write w.x (left edge is fixed);
-          // w.x ?? s.x correctly falls back to the captured start x.
-          wrapper.style.left = `${w.x ?? s.x}px`;
+          const pos = this._interactionPos(this._resizeIndex, w);
+          wrapper.style.left = `${pos.x}px`;
           if (w.w != null) {
             wrapper.style.width = `${w.w}px`;
             this._scaleSvgInWrapper(wrapper, w.w, s.svgH ?? 0);
@@ -1273,10 +1316,10 @@ class EinkDashboardCard extends HTMLElement {
         const startH = s.h ?? wrapper?.offsetHeight ?? MIN_RESIZE_DIM;
         const r = applyCornerResize(
           handle as "nw" | "ne" | "sw" | "se",
-          dx, dy, s.x, s.y, startW, startH, MIN_RESIZE_DIM, dw, dh,
+          dx, dy, ox + s.x, oy + s.y, startW, startH, MIN_RESIZE_DIM, dw, dh,
         );
-        if (r.x !== undefined) w.x = r.x;
-        if (r.y !== undefined) w.y = r.y;
+        if (r.x !== undefined) w.x = r.x - ox;
+        if (r.y !== undefined) w.y = r.y - oy;
         w.w = r.w;
         w.h = r.h;
         // Scale font proportionally for the weather widget, where
@@ -1291,8 +1334,9 @@ class EinkDashboardCard extends HTMLElement {
           }
         }
         if (wrapper) {
-          wrapper.style.left = `${w.x ?? s.x}px`;
-          wrapper.style.top = `${w.y ?? s.y}px`;
+          const pos = this._interactionPos(this._resizeIndex, w);
+          wrapper.style.left = `${pos.x}px`;
+          wrapper.style.top = `${pos.y}px`;
           if (w.w != null) wrapper.style.width = `${w.w}px`;
           if (w.h != null) wrapper.style.height = `${w.h}px`;
           if (w.w != null && w.h != null) {
@@ -1312,10 +1356,16 @@ class EinkDashboardCard extends HTMLElement {
       const w = this._layout.widgets[this._dragIndex] as MutableWidget;
       const s = this._dragWidgetStart!;
       const { width, height } = this._layout.display;
+      // Anchor origins: relative widgets drag by their offset while
+      // clamping and snapping operate in canvas coordinates.
+      const origin = this._widgetOrigins?.[this._dragIndex];
+      const ox = origin ? origin[0] : 0;
+      const oy = origin ? origin[1] : 0;
 
-      // Raw candidate position, clamped to display bounds.
-      const rawX = Math.max(0, Math.min(width - 1, s.x + dx));
-      const rawY = Math.max(0, Math.min(height - 1, s.y + dy));
+      // Raw candidate position in canvas coordinates, clamped to
+      // the display bounds.
+      const rawX = Math.max(0, Math.min(width - 1, ox + s.x + dx));
+      const rawY = Math.max(0, Math.min(height - 1, oy + s.y + dy));
 
       if (event.shiftKey) {
         // Shift held: snap to nearest edge of any other widget.
@@ -1330,13 +1380,13 @@ class EinkDashboardCard extends HTMLElement {
           candidate, this._getSnapTargets(this._dragIndex),
         );
         // Edge snap can shift the candidate past the display edge;
-        // re-clamp after the snap.
-        w.x = Math.max(0, Math.min(width - 1, snapped.x));
-        w.y = Math.max(0, Math.min(height - 1, snapped.y));
+        // re-clamp after the snap, then convert back to offsets.
+        w.x = Math.max(0, Math.min(width - 1, snapped.x)) - ox;
+        w.y = Math.max(0, Math.min(height - 1, snapped.y)) - oy;
         this._showGuides(snapped.guideX, snapped.guideY);
       } else {
-        w.x = snap(rawX);
-        w.y = snap(rawY);
+        w.x = snap(rawX) - ox;
+        w.y = snap(rawY) - oy;
         this._hideGuides();
       }
 
@@ -1357,8 +1407,9 @@ class EinkDashboardCard extends HTMLElement {
       // Update CSS directly; no server round-trip during drag.
       const wrapper = this._wrapperAt(this._dragIndex);
       if (wrapper) {
-        wrapper.style.left = `${w.x}px`;
-        wrapper.style.top = `${w.y}px`;
+        const pos = this._interactionPos(this._dragIndex, w);
+        wrapper.style.left = `${pos.x}px`;
+        wrapper.style.top = `${pos.y}px`;
       }
       return;
     }
@@ -1387,12 +1438,11 @@ class EinkDashboardCard extends HTMLElement {
   /**
    * Finalise a drag or resize interaction on pointer release.
    *
-   * For resizes, clears CSS overrides on the wrapper and
-   * re-fetches the accurate SVG for the widget at its new
-   * dimensions via the render_widget WebSocket command.
-   * For drags, the widget data was already updated on every
-   * pointermove so no re-fetch is needed. In both cases the
-   * editor panel is synced with the updated widget list.
+   * For both interactions a full refresh re-fetches every widget
+   * SVG and its resolved position: resizes change the widget's own
+   * SVG, and either interaction can shift the resolved positions
+   * of widgets that anchor to the moved one.  The editor panel is
+   * synced with the updated widget list in both cases.
    */
   private _onPointerUp(event: PointerEvent): void {
     this._svgContainer?.releasePointerCapture(event.pointerId);
@@ -1408,10 +1458,11 @@ class EinkDashboardCard extends HTMLElement {
         const svg = wrapper.querySelector<SVGElement>("svg");
         if (svg) clearSvgScale(svg);
         // Keep position at the committed coordinates to avoid a
-        // visible jump while _refetchWidget re-renders the SVG.
+        // visible jump while the refresh re-renders the SVG.
         const w = this._layout!.widgets[index];
-        wrapper.style.left = `${w.x ?? 24}px`;
-        wrapper.style.top = `${w.y ?? 0}px`;
+        const pos = this._interactionPos(index, w);
+        wrapper.style.left = `${pos.x}px`;
+        wrapper.style.top = `${pos.y}px`;
       }
 
       this._resizeIndex = -1;
@@ -1423,8 +1474,7 @@ class EinkDashboardCard extends HTMLElement {
         this._editor.setWidgets(this._layout!.widgets);
       }
 
-      // Re-fetch the single resized widget at its new dimensions.
-      void this._refetchWidget(index);
+      void this._fetchWidgetSvgs();
       return;
     }
 
@@ -1436,6 +1486,16 @@ class EinkDashboardCard extends HTMLElement {
 
       if (this._editor) {
         this._editor.setWidgets(this._layout!.widgets);
+      }
+      // Widgets anchoring to the dragged one need their resolved
+      // positions refreshed; skip the round-trip when no widget
+      // uses relative positioning at all.
+      if (
+        this._layout!.widgets.some(
+          (x) => x.relative_to_x || x.relative_to_y,
+        )
+      ) {
+        void this._fetchWidgetSvgs();
       }
     }
   }
@@ -1460,8 +1520,9 @@ class EinkDashboardCard extends HTMLElement {
         wrapper.style.height = "";
         const svg = wrapper.querySelector<SVGElement>("svg");
         if (svg) clearSvgScale(svg);
-        wrapper.style.top = `${s.y}px`;
-        wrapper.style.left = `${s.x}px`;
+        const pos = this._interactionPos(this._resizeIndex, w);
+        wrapper.style.top = `${pos.y}px`;
+        wrapper.style.left = `${pos.x}px`;
       }
       this._resizeIndex = -1;
       this._resizeHandle = null;
@@ -1481,8 +1542,9 @@ class EinkDashboardCard extends HTMLElement {
       }
       const wrapper = this._wrapperAt(this._dragIndex);
       if (wrapper) {
-        wrapper.style.left = `${s.x}px`;
-        wrapper.style.top = `${s.y}px`;
+        const pos = this._interactionPos(this._dragIndex, w);
+        wrapper.style.left = `${pos.x}px`;
+        wrapper.style.top = `${pos.y}px`;
       }
       this._dragIndex = -1;
       this._dragWidgetStart = null;
@@ -1494,42 +1556,6 @@ class EinkDashboardCard extends HTMLElement {
   private _onPointerLeave(): void {
     if (this._dragIndex >= 0 || this._resizeIndex >= 0) return;
     this._clearHandles();
-  }
-
-  /**
-   * Re-fetch the SVG for a single widget after a resize commit.
-   *
-   * Uses the render_widget WebSocket command with the updated
-   * widget dict so the server renders at the new dimensions.
-   * On success, updates the wrapper innerHTML and the cached
-   * SVG string so a subsequent full refresh does not re-render.
-   *
-   * @param index - Widget index to refresh.
-   */
-  private async _refetchWidget(index: number): Promise<void> {
-    if (!this._hass || !this._layout || !this._resolvedEntryId) return;
-    try {
-      const w = this._layout.widgets[index];
-      const result = await this._hass.callWS<RenderWidgetResponse>({
-        type: "eink_dashboard/render_widget",
-        entry_id: this._resolvedEntryId,
-        widget_index: index,
-        widget: w,
-      });
-      const wrapper = this._wrapperAt(index);
-      if (wrapper) {
-        wrapper.innerHTML = result.svg;
-        // Restore position from widget data after clearing CSS overrides.
-        wrapper.style.left = `${w.x ?? 24}px`;
-        wrapper.style.top = `${w.y ?? 0}px`;
-      }
-      this._renderedSvgs[index] = result.svg;
-      this._widgetSvgs[index] = result.svg;
-    } catch (err) {
-      console.error("Failed to re-fetch widget SVG:", err);
-      // Fallback: do a full refresh so the display stays consistent.
-      void this._fetchWidgetSvgs();
-    }
   }
 }
 
