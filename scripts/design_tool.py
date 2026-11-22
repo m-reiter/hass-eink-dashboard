@@ -137,9 +137,37 @@ def _render_svg(widgets: list[dict], config: dict) -> str:
     """
     svg_parts = []
     positions = []
+    # Bounding boxes for relative widget positioning, keyed by the
+    # widget's editor-only label.
+    bboxes: dict[str, dict[str, int]] = {}
     for widget in widgets:
-        svg_parts.append(render_widget_svg(widget, config))
-        positions.append((widget.get("x", PADDING), widget.get("y", 0)))
+        # Relative positioning: resolve x/y from reference widgets.
+        rel_x = widget.get("relative_to_x")
+        rel_y = widget.get("relative_to_y")
+        if rel_x and rel_x in bboxes:
+            wx = bboxes[rel_x]["x"] + bboxes[rel_x]["w"] + widget.get("x", 0)
+        else:
+            wx = widget.get("x", PADDING)
+        if rel_y and rel_y in bboxes:
+            wy = bboxes[rel_y]["y"] + bboxes[rel_y]["h"] + widget.get("y", 0)
+        else:
+            wy = widget.get("y", 0)
+        svg = render_widget_svg(widget, config)
+        svg_parts.append(svg)
+        positions.append((wx, wy))
+        # Store the bounding box using the rendered SVG dimensions.
+        label = widget.get("label")
+        if label:
+            m = re.search(
+                r'width="(\d+)"\s+height="(\d+)"', svg
+            )
+            if m:
+                bboxes[label] = {
+                    "x": wx,
+                    "y": wy,
+                    "w": int(m.group(1)),
+                    "h": int(m.group(2)),
+                }
     return _compose_svg(
         svg_parts,
         positions,

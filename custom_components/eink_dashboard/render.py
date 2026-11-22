@@ -998,6 +998,11 @@ def render_dashboard(
     )
     img = Image.new(canvas_mode, (w, h), canvas_fill)
 
+    # Bounding boxes for relative widget positioning, keyed by the
+    # widget's editor-only label.  Filled as widgets are rendered;
+    # invisible widgets store a 0×0 box at their configured position.
+    bboxes: dict[str, dict[str, int]] = {}
+
     for widget in widget_list:
         widget_type = widget.get("type")
         if widget_type is None:
@@ -1012,6 +1017,19 @@ def render_dashboard(
                 widget_type,
             )
             continue
+        # Relative positioning: resolve x/y from reference widgets
+        # before the visibility check, so invisible widgets with
+        # relative positioning also get a correct anchor position.
+        rel_x = widget.get("relative_to_x")
+        rel_y = widget.get("relative_to_y")
+        if rel_x and rel_x in bboxes:
+            wx = bboxes[rel_x]["x"] + bboxes[rel_x]["w"] + widget.get("x", 0)
+        else:
+            wx = widget.get("x", PADDING)
+        if rel_y and rel_y in bboxes:
+            wy = bboxes[rel_y]["y"] + bboxes[rel_y]["h"] + widget.get("y", 0)
+        else:
+            wy = widget.get("y", 0)
         visibility = widget.get("visibility")
         # Both None (absent) and [] (empty) mean "always visible".
         if visibility:
@@ -1022,9 +1040,15 @@ def render_dashboard(
                     " met for widget type=%s, skipping",
                     widget_type,
                 )
+                label = widget.get("label")
+                if label:
+                    bboxes[label] = {
+                        "x": wx,
+                        "y": wy,
+                        "w": 0,
+                        "h": 0,
+                    }
                 continue
-        wx = widget.get("x", PADDING)
-        wy = widget.get("y", 0)
         _LOGGER.debug(
             "render_dashboard: SVG rendering type=%s at (%d,%d)",
             widget_type,
@@ -1050,6 +1074,17 @@ def render_dashboard(
                 wimg.mode,
             )
         img.paste(wimg.convert(canvas_mode), (wx, wy), mask)
+
+        # Store the bounding box for relative positioning of
+        # subsequent widgets.
+        label = widget.get("label")
+        if label:
+            bboxes[label] = {
+                "x": wx,
+                "y": wy,
+                "w": wimg.width,
+                "h": wimg.height,
+            }
 
     extrema = img.convert("L").getextrema()
     _LOGGER.debug(

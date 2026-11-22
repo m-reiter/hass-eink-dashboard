@@ -105,6 +105,12 @@ class WidgetBase(TypedDict, total=False):
     """Card border stroke width in px (default: heuristic)."""
     card_border_radius: int
     """Card border corner radius in px (default: heuristic)."""
+    relative_to_x: str
+    """Label of a previously defined widget whose right edge is
+    the x-origin. Empty means absolute x positioning."""
+    relative_to_y: str
+    """Label of a previously defined widget whose bottom edge is
+    the y-origin. Empty means absolute y positioning."""
     visibility: list[Condition]
     """Conditions that must all hold for the widget to render."""
 
