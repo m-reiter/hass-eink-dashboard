@@ -314,8 +314,14 @@ const COLOR_OPTIONS = [
 /**
  * Position selectors for x and y coordinates.
  *
+ * The relative_to_x/relative_to_y fields name a previously defined
+ * widget by its label; when set, the x/y values become offsets from
+ * that widget's right/bottom edge instead of absolute canvas
+ * coordinates.
+ *
  * @param d - Display dimensions used as max bounds.
- * @returns Schema array with x and y number fields.
+ * @returns Schema array with x/y number fields and the optional
+ * relative_to_x/relative_to_y reference labels.
  */
 function posXY(d: DisplayConfig): HaFormSchema[] {
   // Position and size fields take any whole pixel.  Dragging in the
@@ -337,6 +343,14 @@ function posXY(d: DisplayConfig): HaFormSchema[] {
       selector: {
         number: { min: 0, max: d.height, step: 1, mode: "box" },
       },
+    },
+    {
+      name: "relative_to_x",
+      selector: { text: {} },
+    },
+    {
+      name: "relative_to_y",
+      selector: { text: {} },
     },
   ];
 }
@@ -1094,24 +1108,7 @@ export const SCHEMAS: Record<
           type: "grid",
           name: "",
           schema: [
-            {
-              name: "x",
-              default: 24,
-              selector: {
-                number: {
-                  min: 0, max: d.width, step: 1, mode: "box",
-                },
-              },
-            },
-            {
-              name: "y",
-              default: 0,
-              selector: {
-                number: {
-                  min: 0, max: d.height, step: 1, mode: "box",
-                },
-              },
-            },
+            ...posXY(d),
             {
               name: "length",
               selector: {
@@ -2474,6 +2471,16 @@ export const HELPERS: Record<string, string> = {
   card_border_radius:
     "Border corner radius in px. Only applies when card_style "
     + "is 'border'. Leave empty for default.",
+  relative_to_x:
+    "Label of an earlier widget whose right edge becomes the "
+    + "x-origin; the X value is then an offset from that edge "
+    + "instead of an absolute position. Leave empty for absolute "
+    + "positioning.",
+  relative_to_y:
+    "Label of an earlier widget whose bottom edge becomes the "
+    + "y-origin; the Y value is then an offset from that edge "
+    + "instead of an absolute position. Leave empty for absolute "
+    + "positioning.",
 };
 
 export const LABELS: Record<string, string> = {
@@ -2489,6 +2496,8 @@ export const LABELS: Record<string, string> = {
   state_content: "State attribute",
   title: "Title",
   x: "X", y: "Y", w: "Width", h: "Height",
+  relative_to_x: "Relative to (X)",
+  relative_to_y: "Relative to (Y)",
   fill_color: "Fill color",
   border_width: "Border width",
   border_radius: "Corner radius",

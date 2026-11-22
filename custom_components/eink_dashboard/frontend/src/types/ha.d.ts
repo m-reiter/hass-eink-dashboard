@@ -418,6 +418,18 @@ interface WidgetBase {
   w?: number;
   /** Widget height in canvas pixels. */
   h?: number;
+  /**
+   * Label of a previously defined widget whose right edge is the
+   * x-origin; when set, x becomes an offset from that edge instead
+   * of an absolute canvas coordinate.
+   */
+  relative_to_x?: string;
+  /**
+   * Label of a previously defined widget whose bottom edge is the
+   * y-origin; when set, y becomes an offset from that edge instead
+   * of an absolute canvas coordinate.
+   */
+  relative_to_y?: string;
   /** Font size override (weather widget only). */
   font_size?: number;
   /**
