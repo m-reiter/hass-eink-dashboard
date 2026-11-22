@@ -204,9 +204,7 @@ class TestResolveWidgetPositions:
 
     def test_unknown_reference_falls_back_to_absolute(self) -> None:
         widgets = [_frame(x=10, y=5, relative_to_x="ghost")]
-        positions, origins = resolve_widget_positions(
-            widgets, [(100, 50)]
-        )
+        positions, origins = resolve_widget_positions(widgets, [(100, 50)])
         assert positions == [(10, 5)]
         assert origins == [(0, 0)]
 
@@ -247,8 +245,7 @@ class TestWidgetSvgSize:
 
     def test_parses_root_dimensions(self) -> None:
         svg = (
-            '<svg xmlns="http://www.w3.org/2000/svg"'
-            ' width="216" height="112">'
+            '<svg xmlns="http://www.w3.org/2000/svg" width="216" height="112">'
         )
         assert widget_svg_size(svg) == (216, 112)
 
