@@ -1499,7 +1499,7 @@ export interface ListWidget extends WidgetBase {
   /** Suppress the icon. */
   hide_icon?: boolean;
   /** Header override (default: entity state). */
-  name?: string;
+  list_header?: string;
   /** Maximum row height in pixels (default: config row_height). */
   row_height?: number;
   /** Per-role font overrides; roles: "title", "primary". */
