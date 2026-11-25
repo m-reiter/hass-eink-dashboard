@@ -2376,16 +2376,12 @@ export const SCHEMAS: Record<
           required: true,
           selector: { entity: {} },
         },
-        elementsListSelector(),
         {
-          name: "name",
-          description:
-            "Header override. Leave empty to use the entity state.",
+          name: "list_header",
           selector: { text: {} },
         },
         {
           name: "source",
-          description: "Attribute name holding the comma-separated list.",
           selector: { text: {} },
         },
         {
@@ -2442,6 +2438,9 @@ export const HELPERS: Record<string, string> = {
     + "of items. Leave empty to use the first non-meta attribute.",
   separator:
     "Separator between list items (default \", \").",
+  list_header:
+    "Header text above the rows. Leave empty to use the "
+    + "entity state.",
   max_items:
     "Maximum number of items to show. If exceeded, shows one item "
     + "fewer plus an \"+N weitere\" row.",
@@ -2523,6 +2522,7 @@ export const LABELS: Record<string, string> = {
   entries: "Entries",
   source: "Source attribute",
   separator: "List separator",
+  list_header: "Header",
   max_items: "Max items",
   forecast_days: "Forecast days",
   temperature_entity: "Temperature sensor",

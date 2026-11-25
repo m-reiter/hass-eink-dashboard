@@ -62,7 +62,7 @@ def _build_list_context(
         widget: Widget config dict.  Recognised keys:
             ``entity``, ``source`` (attribute name),
             ``separator`` (default ``, ``), ``max_items``,
-            ``hide_icon``, ``name`` (header override),
+            ``hide_icon``, ``list_header`` (header override),
             ``card_style``, ``x``, ``w``, ``h``.
         config: Display config with ``states``, ``display_levels``,
             and ``font_scale``.
@@ -100,7 +100,9 @@ def _build_list_context(
     hide_icon = bool(widget.get("hide_icon", False))
 
     # Header: entity state or override.
-    header: str = widget.get("name") or str(entity.state_val or "")
+    header: str = (
+        widget.get("list_header") or str(entity.state_val or "")
+    )
 
     # Source attribute.
     source_attr = widget.get("source", "")

@@ -670,7 +670,7 @@ class ListWidget(
     """Maximum number of items to show (default: all)."""
     hide_icon: bool
     """Suppress the icon."""
-    name: str
-    """Title override (default: entity state)."""
+    list_header: str
+    """Header override (default: entity state)."""
     layout: str
     """``"list"`` (one per line) or ``"inline"`` (comma-separated)."""
