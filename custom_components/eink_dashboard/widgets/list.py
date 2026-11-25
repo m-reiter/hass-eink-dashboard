@@ -100,9 +100,7 @@ def _build_list_context(
     hide_icon = bool(widget.get("hide_icon", False))
 
     # Header: entity state or override.
-    header: str = (
-        widget.get("list_header") or str(entity.state_val or "")
-    )
+    header: str = widget.get("list_header") or str(entity.state_val or "")
 
     # Source attribute.
     source_attr = widget.get("source", "")
