@@ -64,8 +64,16 @@ if TYPE_CHECKING:
     _PilFont = ImageFont.FreeTypeFont | ImageFont.ImageFont
 
 
-def _now() -> datetime:
-    """Current local time, timezone-aware."""
+def _now(config: DisplayConfig) -> datetime:
+    """Current local time, timezone-aware.
+
+    An explicit ``now`` in the display config pins the timeline
+    (design tool preview, tests); otherwise the real clock
+    applies.
+    """
+    pinned = _parse_dt(config.get("now"))
+    if pinned is not None:
+        return pinned
     return datetime.now().astimezone()
 
 
@@ -103,7 +111,10 @@ def _format_time(
             # "103 min" reads worse than "1h43m"; minutes without
             # a leading zero ("1h4m").
             return f"{wait_min // 60}h{wait_min % 60}m"
-        return f"{max(wait_min, 0)} min"
+        # No space: "2m" stays consistent with the "1h43m"
+        # hour format and is the most compact variant (Roboto
+        # renders even the narrow no-break space full-width).
+        return f"{max(wait_min, 0)}m"
     return estimated.strftime("%H:%M")
 
 
@@ -567,7 +578,8 @@ def _build_departures_context(
             ``row_font_scale``, ``hide_icon``, ``icon``,
             ``icon_style``, ``card_style``, ``x``, ``w``, ``h``.
         config: Display config with ``states``, ``display_levels``,
-            and ``font_scale``.
+            and ``font_scale``; the optional ``now`` key pins the
+            departure timeline (design tool / tests).
 
     Returns:
         Template context dict consumed by ``departures.svg.j2``.
@@ -614,7 +626,7 @@ def _build_departures_context(
     header = str(widget.get("list_header") or "")
     header_icon = str(widget.get("header_icon", DEFAULT_HEADER_ICON))
 
-    now = _now()
+    now = _now(config)
 
     raw_rows, row_cells, row_sources = _collect_rows(
         config,

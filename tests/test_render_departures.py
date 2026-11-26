@@ -41,7 +41,6 @@ from tests.helpers import (
 )
 
 _NOW = datetime(2026, 11, 22, 10, 0, 0, tzinfo=timezone(timedelta(hours=1)))
-_PATCH_NOW = "custom_components.eink_dashboard.widgets.departures._now"
 
 _M43_TIMES = [
     {
@@ -131,13 +130,20 @@ _U4 = {
 
 _STATES = {"sensor.m43": _M43, "sensor.u4": _U4}
 
-_CONFIG = {"width": 800, "height": 480, "states": _STATES}
+# The pinned "now" freezes the departure timeline for every test.
+_CONFIG = {
+    "width": 800,
+    "height": 480,
+    "states": _STATES,
+    "now": _NOW.isoformat(),
+}
 
 
 def _render(widget: dict, config: dict | None = None) -> str:
-    """Render the departures widget with a fixed _now()."""
-    with patch(_PATCH_NOW, return_value=_NOW):
-        return render_widget_svg(widget, config or _CONFIG)
+    """Render the departures widget with the pinned timeline."""
+    cfg = dict(config or _CONFIG)
+    cfg.setdefault("now", _NOW.isoformat())
+    return render_widget_svg(widget, cfg)
 
 
 def _widget(**overrides: object) -> dict:
@@ -195,8 +201,8 @@ class TestDeparturesWidget:
                 max_times=4,
             )
         )
-        assert ">0 min<" in svg
-        assert ">31 min<" in svg
+        assert ">0m<" in svg
+        assert ">31m<" in svg
 
     def test_relative_over_an_hour_uses_hm_format(self) -> None:
         # 103 minutes away read as "1h43m", not "103 min".
@@ -212,8 +218,8 @@ class TestDeparturesWidget:
     def test_auto_switches_at_one_hour(self) -> None:
         # Auto shows relative times up to 59 minutes, then absolute.
         svg = _render(_widget(entities=["sensor.m43"], time_format="auto"))
-        assert ">0 min<" in svg
-        assert ">31 min<" in svg
+        assert ">0m<" in svg
+        assert ">31m<" in svg
         assert ">11:05<" in svg  # 65 min away -> absolute
 
     def test_head_sign_strip_prefix(self) -> None:
