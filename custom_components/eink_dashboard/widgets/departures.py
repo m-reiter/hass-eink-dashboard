@@ -115,7 +115,7 @@ def _format_time(
         # hour format and is the most compact variant (Roboto
         # renders even the narrow no-break space full-width).
         return f"{max(wait_min, 0)}m"
-    return estimated.strftime("%H:%M")
+    return estimated.strftime("%-H:%M")
 
 
 # Alert-variant icons: transport icon -> alert variant.  Icons

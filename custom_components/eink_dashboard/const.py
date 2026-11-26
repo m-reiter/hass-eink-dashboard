@@ -160,7 +160,7 @@ DEFAULT_ALERT_STYLE = "triangle"
 icon) or ``"none"``."""
 DEFAULT_HEADER_ICON = "mdi:bus-clock"
 """Header icon (top right); empty disables it."""
-DEPARTURES_COLUMN_GAP_FACTOR = 0.5
+DEPARTURES_COLUMN_GAP_FACTOR = 0.75
 """Gap between departure time columns, as a factor of the time
 font size."""
 DEFAULT_LINE_STYLE = "badge"
