@@ -300,6 +300,21 @@ export const WIDGET_TYPES: Record<string, WidgetTypeMeta> = {
       card_style: DEFAULT_CARD_STYLE,
     },
   },
+  departures: {
+    label: "Departures",
+    description: "Public transport departures, one line per row",
+    icon: "mdi:bus-clock",
+    defaults: {
+      type: "departures",
+      x: 24,
+      y: 0,
+      w: 400,
+      entities: [],
+      list_header: "",
+      card_style: DEFAULT_CARD_STYLE,
+      icon_style: "none",
+    },
+  },
 };
 
 // ── ha-form schema builders ──────────────────────────────────────
@@ -2423,6 +2438,134 @@ export const SCHEMAS: Record<
       ],
     },
   ],
+  departures: (d) => [
+    identitySection(),
+    {
+      name: "content",
+      type: "expandable",
+      flatten: true,
+      expanded: true,
+      title: "Content",
+      icon: "mdi:bus-clock",
+      schema: [
+        {
+          name: "entities",
+          required: true,
+          selector: {
+            entity: {
+              multiple: true,
+              domain: "sensor",
+              integration: "ha_departures",
+            },
+          },
+        },
+        { name: "list_header", selector: { text: {} } },
+        { name: "header_icon", selector: { icon: {} } },
+        { name: "head_sign_strip_prefix", selector: { text: {} } },
+        {
+          name: "time_format",
+          default: "absolute",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                { value: "absolute", label: "Absolute (HH:MM)" },
+                { value: "relative", label: "Relative (min)" },
+                { value: "auto", label: "Auto (< 1 h relative)" },
+              ],
+            },
+          },
+        },
+        {
+          name: "max_times",
+          default: 3,
+          selector: { number: { min: 1, max: 6, mode: "box" } },
+        },
+        {
+          name: "min_minutes",
+          default: 0,
+          selector: { number: { min: 0, max: 30, mode: "box" } },
+        },
+        {
+          name: "delay_style",
+          default: "first",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                { value: "first", label: "Next departure only" },
+                { value: "all", label: "All departures" },
+                { value: "none", label: "Hide delays" },
+              ],
+            },
+          },
+        },
+        {
+          name: "alert_style",
+          default: "triangle",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                { value: "triangle", label: "Triangle" },
+                { value: "icon", label: "Alert icon" },
+                { value: "none", label: "Off" },
+              ],
+            },
+          },
+        },
+        {
+          name: "line_style",
+          default: "badge",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                { value: "badge", label: "Badge" },
+                { value: "text", label: "Text" },
+              ],
+            },
+          },
+        },
+        hideIconSelector(),
+        rowHeightSelector(d),
+        {
+          name: "row_font_scale",
+          default: 1,
+          selector: {
+            number: { min: 1, max: 3, step: 0.05, mode: "box" },
+          },
+        },
+      ],
+    },
+    {
+      name: "layout_pos",
+      type: "expandable",
+      flatten: true,
+      title: "Layout",
+      icon: "mdi:move-resize",
+      schema: [{ type: "grid", name: "", schema: posXYWH(d) }],
+    },
+    {
+      name: "appearance",
+      type: "expandable",
+      flatten: true,
+      title: "Appearance",
+      icon: "mdi:palette",
+      schema: [
+        cardStyleSelector(),
+        cardBorderWidthSelector(),
+        cardBorderRadiusSelector(),
+        iconStyleSelector("none"),
+        fontsSection([
+          ["title", "Header"],
+          ["line", "Line"],
+          ["destination", "Destination"],
+          ["time", "Times"],
+        ]),
+      ],
+    },
+  ],
 };
 
 export const HELPERS: Record<string, string> = {
@@ -2441,6 +2584,20 @@ export const HELPERS: Record<string, string> = {
   list_header:
     "Header text above the rows. Leave empty to use the "
     + "entity state.",
+  header_icon:
+    "Icon top right on the header row. Leave empty for none.",
+  head_sign_strip_prefix:
+    "Removed from the start of every destination, e.g. the "
+    + "shared city prefix \"Frankfurt (Main) \".",
+  max_times:
+    "Number of departure times shown per row.",
+  min_minutes:
+    "Departures leaving sooner than this many minutes are hidden "
+    + "so they are not gone by the time the display refreshes.",
+  row_font_scale:
+    "Scales all default font sizes of this widget (1 = metrics "
+    + "default). Explicit per-role sizes under Fonts take "
+    + "precedence.",
   max_items:
     "Maximum number of items to show. If exceeded, shows one item "
     + "fewer plus an \"+N weitere\" row.",
@@ -2523,6 +2680,15 @@ export const LABELS: Record<string, string> = {
   source: "Source attribute",
   separator: "List separator",
   list_header: "Header",
+  header_icon: "Header icon",
+  head_sign_strip_prefix: "Strip destination prefix",
+  time_format: "Time format",
+  max_times: "Times per row",
+  min_minutes: "Hide sooner than (min)",
+  delay_style: "Delay chips",
+  alert_style: "Alert display",
+  line_style: "Line display",
+  row_font_scale: "Font scale",
   max_items: "Max items",
   forecast_days: "Forecast days",
   temperature_entity: "Temperature sensor",
@@ -2677,6 +2843,13 @@ export function getSummary(widget: Widget): string {
       ? "Vertical" : "Horizontal";
     const sty = widget.style === "bar" ? "bar" : "line";
     return `${dir} ${sty} at Y:${widget.y ?? 0}`;
+  }
+  if (t === "departures") {
+    const ents = widget.entities || [];
+    if (!ents.length) return "(no entities)";
+    return ents.length === 1
+      ? ents[0]
+      : `${ents[0]} +${ents.length - 1}`;
   }
   return t;
 }

@@ -29,6 +29,7 @@ export const ICON_FALLBACK: Record<string, string> = {
   "mdi:thermometer": "🌡",
   "mdi:battery": "🔋",
   "mdi:checkbox-marked-circle": "✓",
+  "mdi:bus-clock": "🚌",
   "mdi:trash-can": "🗑",
   "mdi:card-text": "▣",
   "mdi:card-text-outline": "▢",

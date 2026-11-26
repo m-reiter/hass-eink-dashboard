@@ -77,12 +77,11 @@ describe("WIDGET_TYPES", () => {
     "week_calendar",
     "flex",
     "list",
+    "departures",
   ];
 
-  it("has all 17 widget types", () => {
-    expect(Object.keys(WIDGET_TYPES).sort()).toEqual(
-      ALL_TYPES.sort()
-    );
+  it("has all 18 widget types", () => {
+    expect(Object.keys(WIDGET_TYPES).sort()).toEqual(ALL_TYPES.sort());
   });
 
   it("each entry has a label and defaults with matching type field", () => {
@@ -140,9 +139,10 @@ describe("SCHEMAS", () => {
     "week_calendar",
     "flex",
     "list",
+    "departures",
   ];
 
-  it("has a schema builder for all 17 widget types", () => {
+  it("has a schema builder for all 18 widget types", () => {
     expect(Object.keys(SCHEMAS).sort()).toEqual(ALL_TYPES.sort());
   });
 

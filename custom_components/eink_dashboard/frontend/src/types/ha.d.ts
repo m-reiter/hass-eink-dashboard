@@ -1585,6 +1585,74 @@ export interface ListWidget extends WidgetBase {
   fonts?: WidgetFonts;
 }
 
+/** Public transport departures: one transit line per row. */
+export interface DeparturesWidget extends WidgetBase {
+  type: "departures";
+  /**
+   * Departure sensor entity IDs (e.g. from the "Public Transport
+   * Departures" integration), one per row, in display order.
+   */
+  entities?: string[];
+  /** Header text above the rows; empty hides the header. */
+  list_header?: string;
+  /**
+   * MDI icon top right on the header row (default:
+   * "mdi:bus-clock"; empty disables it).
+   */
+  header_icon?: string;
+  /**
+   * Prefix removed from every destination, e.g.
+   * "Frankfurt (Main) ".
+   */
+  head_sign_strip_prefix?: string;
+  /**
+   * Time display: "absolute" (default), "relative" ("24 min",
+   * "+1h43m") or "auto" (relative up to 59 minutes, then
+   * absolute).
+   */
+  time_format?: "absolute" | "relative" | "auto";
+  /** Departure times shown per row (default: 3). */
+  max_times?: number;
+  /** Drop departures sooner than this many minutes (default 0). */
+  min_minutes?: number;
+  /**
+   * Delay chips next to the affected time: "all" (every delayed
+   * departure), "first" (default; only the next departure per
+   * row) or "none".
+   */
+  delay_style?: "all" | "first" | "none";
+  /**
+   * Alert marker: "triangle" (default; gray marker before the
+   * times), "icon" (swap the row icon for its alert variant) or
+   * "none".
+   */
+  alert_style?: "triangle" | "icon" | "none";
+  /** Line name display: "badge" (default) or "text". */
+  line_style?: "badge" | "text";
+  /**
+   * Font scale on top of the metrics-derived default sizes
+   * (default: 1; applies to header, line, destination and time
+   * fonts).
+   */
+  row_font_scale?: number;
+  /** Suppress the row icons. */
+  hide_icon?: boolean;
+  /** MDI icon override for the row icons. */
+  icon?: string;
+  /** Icon circle rendering mode (default: "none" for this
+   * widget). */
+  icon_style?: IconStyle;
+  /** Maximum row height in pixels (default: config row_height). */
+  row_height?: number;
+  /**
+   * Per-role font overrides; roles: "title", "line",
+   * "destination", "time".
+   */
+  fonts?: WidgetFonts;
+  /** Decorative frame style. */
+  card_style?: CardStyle;
+}
+
 export type Widget =
   | FrameWidget
   | SeparatorWidget
@@ -1602,7 +1670,8 @@ export type Widget =
   | GraphWidget
   | FlexWidget
   | MeteogramWidget
-  | ListWidget;
+  | ListWidget
+  | DeparturesWidget;
 
 /** Registry entry for one widget type shown in the widget picker grid. */
 export interface WidgetTypeMeta {
