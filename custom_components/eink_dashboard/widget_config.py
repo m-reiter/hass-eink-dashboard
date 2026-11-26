@@ -674,3 +674,49 @@ class ListWidget(
     """Header override (default: entity state)."""
     layout: str
     """``"list"`` (one per line) or ``"inline"`` (comma-separated)."""
+
+
+class DeparturesFields(TypedDict, total=False):
+    """Keys of widgets that show transit departures."""
+
+    entities: list[str]
+    """Departure sensor entity IDs, one per row, in display order."""
+    list_header: str
+    """Header override; empty (default) hides the header."""
+    head_sign_strip_prefix: str
+    """Prefix removed from every departure destination, e.g.
+    ``"Frankfurt (Main) "``."""
+    time_format: str
+    """``"absolute"`` (default), ``"relative"`` or ``"auto"``
+    (relative up to 59 minutes, then absolute)."""
+    max_times: int
+    """Departure times shown per row (default: 3)."""
+    min_minutes: int
+    """Drop departures sooner than this many minutes away
+    (default: 0 = keep everything not yet departed)."""
+    delay_style: str
+    """Delay chips next to the affected time: ``"all"`` (every
+    delayed departure), ``"first"`` (only the next departure per
+    row) or ``"none"``."""
+    alert_style: str
+    """``"triangle"`` (gray marker before the times, default),
+    ``"icon"`` (swap the row icon for its alert variant) or
+    ``"none"``."""
+    header_icon: str
+    """MDI icon top right on the header row (default:
+    ``"mdi:bus-clock"``; empty disables it)."""
+    line_style: str
+    """``"badge"`` (filled chip, default) or ``"text"`` (bold)."""
+    row_font_scale: float
+    """Font scale on top of the metrics-derived default font
+    sizes (1.0 = metrics default; applies to header, line,
+    destination and time fonts)."""
+
+
+class DeparturesWidget(
+    WidgetBase, IconFields, ListFields, DeparturesFields, total=False
+):
+    """Departures widget: one transit line with its next departures
+    per row."""
+
+    type: str  # "departures"

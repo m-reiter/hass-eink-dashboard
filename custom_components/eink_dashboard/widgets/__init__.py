@@ -22,6 +22,7 @@ import.
 """
 
 from .calendar import _build_calendar_context
+from .departures import _build_departures_context
 from .device_battery import (
     _build_device_battery_context,
 )
@@ -47,6 +48,7 @@ from .week_calendar import _build_week_calendar_context
 
 __all__ = [
     "_build_calendar_context",
+    "_build_departures_context",
     "_build_device_battery_context",
     "_build_entities_context",
     "_build_entity_context",

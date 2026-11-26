@@ -1,0 +1,128 @@
+{#-
+  Departures widget: one transit line per row.
+
+  Row layout: entity icon (optional) | line name (badge or bold
+  text) | destination of the next departure, pre-truncated | alert
+  icon (optional) | next departure times in pre-measured columns,
+  each with an optional delay badge above it.
+
+  All layout math (positions, badge sizes, truncation, icon SVG
+  strings) is computed by _build_departures_context(); this
+  template only emits SVG markup.
+-#}
+{%- from "_macros.svg.j2" import card_container, icon_circle with context -%}
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="{{ w }}" height="{{ h }}">
+{%- if has_rows -%}
+{%- call card_container(
+    x=0, y=0, w=w, h=h,
+    card_style=card_style,
+    radius=m_radius, border=m_border,
+    bar_width=bar_width,
+    border_color=hex_black, bar_color=hex_gray) -%}
+{%- for row in rows -%}
+{%- if row.header -%}
+<text
+  x="{{ row.header_x }}" y="{{ row.header_y }}"
+  font-family="{{ header_font_sz | font_family(font_family_name) }}"
+  font-size="{{ header_font_sz | font_px }}"
+  font-weight="{{ header_weight }}"
+  dominant-baseline="central"
+  fill="{{ hex_black }}">{{ header }}</text>
+{%- if row.header_icon_svg -%}
+<g transform="translate({{ row.header_icon_x }}, {{ row.header_icon_y }})"
+  style="color: {{ hex_black }}">{{ row.header_icon_svg }}</g>
+{%- endif -%}
+{%- else -%}
+{#- ── Icon ──────────────────────────────────────────────────────── -#}
+{%- set icon_cx = x_off + lpad + m_icon_dia // 2 -%}
+{%- set icon_cy = row.y + row_h // 2 -%}
+{{ icon_circle(
+    icon_cx, icon_cy, m_icon_dia // 2,
+    icon_cx - row.icon_inner_sz // 2,
+    icon_cy - row.icon_inner_sz // 2,
+    icon_stroke_w, hex_black, hex_black,
+    hex_black, hex_white,
+    icon_svg=row.icon_svg,
+    icon_outline=row.icon_outline,
+    icon_no_circle=row.icon_no_circle) }}
+{#- ── Line badge / text ─────────────────────────────────────────── -#}
+{%- if row.line_badge -%}
+<rect
+  x="{{ row.line_badge.x }}" y="{{ row.line_badge.y }}"
+  width="{{ row.line_badge.w }}" height="{{ row.line_badge.h }}"
+  rx="6" ry="6"
+  fill="{{ hex_black }}"/>
+<text
+  x="{{ row.line_badge.text_x }}" y="{{ row.line_badge.text_y }}"
+  font-family="{{ line_font_sz | font_family(font_family_name) }}"
+  font-size="{{ line_font_sz | font_px }}"
+  font-weight="bold"
+  text-anchor="middle"
+  dominant-baseline="central"
+  fill="{{ hex_white }}">{{ row.line_badge.text }}</text>
+{%- else -%}
+<text
+  x="{{ row.line_x }}" y="{{ row.y + row_h // 2 }}"
+  font-family="{{ line_font_sz | font_family(font_family_name) }}"
+  font-size="{{ line_font_sz | font_px }}"
+  font-weight="{{ line_weight }}"
+  text-anchor="middle"
+  dominant-baseline="central"
+  fill="{{ hex_black }}">{{ row.line }}</text>
+{%- endif -%}
+{#- ── Destination (pre-truncated) ───────────────────────────────── -#}
+<text
+  x="{{ row.dest_x }}" y="{{ row.y + row_h // 2 }}"
+  font-family="{{ dest_font_sz | font_family(font_family_name) }}"
+  font-size="{{ dest_font_sz | font_px }}"
+  font-weight="{{ dest_weight }}"
+  text-anchor="start"
+  dominant-baseline="central"
+  fill="{{ hex_black }}">{{ row.dest }}</text>
+{#- ── Departure times (pre-positioned columns) ──────────────────── -#}
+{%- for cell in row.cells -%}
+{%- if cell.badge -%}
+<rect
+  x="{{ cell.badge.x }}" y="{{ cell.badge.y }}"
+  width="{{ cell.badge.w }}" height="{{ cell.badge.h }}"
+  rx="4" ry="4"
+  fill="{{ hex_black }}"/>
+<text
+  x="{{ cell.badge.text_x }}" y="{{ cell.badge.text_y }}"
+  font-family="{{ cell.badge.font_sz
+      | font_family(font_family_name) }}"
+  font-size="{{ cell.badge.font_sz | font_px }}"
+  font-weight="bold"
+  text-anchor="middle"
+  dominant-baseline="central"
+  fill="{{ hex_white }}">{{ cell.badge.text }}</text>
+{%- endif -%}
+<text
+  x="{{ cell.x }}" y="{{ row.y + row_h // 2 }}"
+  font-family="{{ time_font_sz | font_family(font_family_name) }}"
+  font-size="{{ time_font_sz | font_px }}"
+  font-weight="{{ time_weight }}"
+  text-anchor="end"
+  dominant-baseline="central"
+  fill="{{ hex_black }}">{{ cell.text }}</text>
+{%- endfor -%}
+{#- ── Alert icon (pre-positioned between dest and times) ───────── -#}
+{%- if row.alert -%}
+<g transform="translate({{ row.alert_x }}, {{ row.alert_y }})"
+  style="color: {{ hex_gray }}">{{ row.alert_icon }}</g>
+{%- endif -%}
+{%- endif -%}
+{%- if not loop.last and divider_stroke_w -%}
+<line class="eink-divider"
+  x1="{{ x_off + lpad }}"
+  y1="{{ row.y + row_h + divider_y_off }}"
+  x2="{{ w - r_inset - rpad }}"
+  y2="{{ row.y + row_h + divider_y_off }}"
+  stroke="{{ hex_gray }}"
+  stroke-width="{{ divider_stroke_w }}"/>
+{%- endif -%}
+{%- endfor -%}
+{%- endcall -%}
+{%- endif -%}
+</svg>

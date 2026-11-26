@@ -143,6 +143,31 @@ def color_to_hex(c: int) -> str:
 
 DEFAULT_CARD_STYLE = "none"
 
+# Departures widget defaults.
+DEFAULT_MAX_TIMES = 3
+"""Departure times shown per line row."""
+DEFAULT_MIN_MINUTES = 0
+"""Departures closer than this many minutes are dropped."""
+DEFAULT_TIME_FORMAT = "absolute"
+"""``"absolute"``, ``"relative"`` or ``"auto"``."""
+AUTO_TIME_MAX_MIN = 59
+"""Relative times switch to absolute above this many minutes."""
+DEFAULT_DELAY_STYLE = "first"
+"""Delay chips: ``"all"`` (every delayed departure), ``"first"``
+(only the next departure per row) or ``"none"``."""
+DEFAULT_ALERT_STYLE = "triangle"
+"""Alert display: ``"triangle"``, ``"icon"`` (alert-variant row
+icon) or ``"none"``."""
+DEFAULT_HEADER_ICON = "mdi:bus-clock"
+"""Header icon (top right); empty disables it."""
+DEPARTURES_COLUMN_GAP_FACTOR = 0.5
+"""Gap between departure time columns, as a factor of the time
+font size."""
+DEFAULT_LINE_STYLE = "badge"
+"""``"badge"`` (filled chip) or ``"text"``."""
+DEFAULT_ROW_FONT_SCALE = 1.0
+"""Font scale on top of the metrics-derived row font sizes."""
+
 # Scale denominator for weather widget geometry: all _WX_* base
 # dimensions are natural values at font_size == FONT_SIZE_WEATHER
 # and are multiplied by (font_size / FONT_SIZE_WEATHER) in
@@ -582,3 +607,4 @@ class WidgetType(StrEnum):
     CALENDAR = "calendar"
     METEOGRAM = "meteogram"
     WEEK_CALENDAR = "week_calendar"
+    DEPARTURES = "departures"
