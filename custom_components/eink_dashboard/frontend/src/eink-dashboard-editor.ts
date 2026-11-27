@@ -1162,6 +1162,24 @@ export const SCHEMAS: Record<
           selector: { number: { min: 0, max: 14, mode: "box" } },
         },
         {
+          name: "forecast_type",
+          default: "daily",
+          selector: {
+            select: {
+              options: [
+                { value: "daily", label: "Daily" },
+                { value: "hourly", label: "Hourly" },
+              ],
+              mode: "dropdown",
+            },
+          },
+        },
+        {
+          name: "forecast_hours",
+          default: 12,
+          selector: { number: { min: 1, max: 24, mode: "box" } },
+        },
+        {
           name: "temperature_entity",
           selector: { entity: { domain: "sensor" } },
         },
@@ -2691,6 +2709,8 @@ export const LABELS: Record<string, string> = {
   row_font_scale: "Font scale",
   max_items: "Max items",
   forecast_days: "Forecast days",
+  forecast_type: "Forecast type",
+  forecast_hours: "Forecast hours",
   temperature_entity: "Temperature sensor",
   humidity_entity: "Humidity sensor",
   mode: "Mode",
